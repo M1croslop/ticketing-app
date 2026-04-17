@@ -18,7 +18,7 @@ Ejecuta estos comandos en tu terminal para preparar el código fuente:
 
 1. Descarga el repositorio:
 ```bash
-   git clone [https://github.com/M1croslop/ticketing-app.git](https://github.com/M1croslop/ticketing-app.git)
+   git clone https://github.com/M1croslop/ticketing-app.git
 ````
 
 2.  Ingresa al directorio:
