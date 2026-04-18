@@ -98,28 +98,28 @@ La estructura de datos del sistema sigue el diseño definido en el siguiente esq
 <img width="1080" height="1080" alt="schema" src="https://github.com/user-attachments/assets/cea6e711-2e6b-42ca-86bd-31f088b85324" />
 
 
+## Reglas de Trabajo en Equipo
+
+**1. Flujo de Ramas (GitFlow)**
+
+* Todo el trabajo diario se realiza en la rama `develop`.
+* Antes de iniciar a programar, ejecuta `git checkout develop` y `git pull origin develop`.
+* La rama `main` está protegida. Solo recibe actualizaciones al final del sprint mediante un Pull Request.
+
+**2. Estándar de Commits**
+
+Utilizamos la especificación [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/). Sigue esta estructura:
+`tipo(alcance opcional): descripción corta`
+
+* **feat**: Nueva funcionalidad para el usuario.
+* **fix**: Solución de un error en el código.
+* **docs**: Cambios exclusivamente en la documentación.
+* **style**: Cambios de formato que no afectan la lógica.
+* **refactor**: Cambio en el código que no corrige errores ni añade funciones.
+* **test**: Añadir o corregir pruebas existentes.
+* **chore**: Actualizaciones de tareas de construcción o herramientas locales.
+
 > [\!IMPORTANT]
->
-> ### Reglas de Trabajo en Equipo
->
-> **1. Flujo de Ramas (GitFlow)**
->
->   * Todo el trabajo diario se realiza en la rama `develop`.
->   * Antes de iniciar a programar, ejecuta `git checkout develop` y `git pull origin develop`.
->   * La rama `main` está protegida. Solo recibe actualizaciones al final del sprint mediante un Pull Request.
->
-> **2. Estándar de Commits**
-> Utilizamos la especificación [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/). Sigue esta estructura:
-> `tipo(alcance opcional): descripción corta`
->
->   * **feat**: Nueva funcionalidad para el usuario.
->   * **fix**: Solución de un error en el código.
->   * **docs**: Cambios exclusivamente en la documentación.
->   * **style**: Cambios de formato que no afectan la lógica.
->   * **refactor**: Cambio en el código que no corrige errores ni añade funciones.
->   * **test**: Añadir o corregir pruebas existentes.
->   * **chore**: Actualizaciones de tareas de construcción o herramientas locales.
->
 > *Ejemplo:* `feat(auth): implementar validación de correo electrónico`
 
 ## License
