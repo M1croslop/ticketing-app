@@ -11,9 +11,21 @@ export default {
 
     theme: {
         extend: {
-            fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+
+            colors: {
+                synapso: {
+                    navy: '#1E293B',
+                    gold: '#D97706',
+                    bg: '#F8FAFC',
+                    success: '#059669',
+                    danger: '#DC2626',
+                }
             },
+
+            fontFamily: {
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+            },
+
         },
     },
 
