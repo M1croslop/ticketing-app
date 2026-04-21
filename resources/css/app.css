@@ -1,11 +1,36 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
+/* Componentes reutilizables Synapso */
+@layer components {
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+  .btn-primary {
+    @apply bg-synapso-navy text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90;
+  }
+
+  .btn-action {
+    @apply bg-synapso-gold text-white px-4 py-2 rounded-lg font-semibold hover:opacity-90;
+  }
+
+  .card {
+    @apply bg-white border border-slate-200 rounded-lg p-4;
+  }
+
+  .badge-critical {
+    @apply text-synapso-danger text-xs font-bold uppercase;
+  }
+
+  .badge-high {
+    @apply text-synapso-gold text-xs font-bold uppercase;
+  }
+
+  .badge-medium {
+    @apply text-blue-600 text-xs font-bold uppercase;
+  }
+
+  .badge-low {
+    @apply text-slate-500 text-xs font-bold uppercase;
+  }
+
 }
