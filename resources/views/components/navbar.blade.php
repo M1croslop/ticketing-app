@@ -6,7 +6,7 @@
 
         <div class="hidden md:flex space-x-4 text-sm">
             <a href="#" class="hover:text-synapso-gold transition">Dashboard</a>
-            <a href="#" class="hover:text-synapso-gold transition">Tickets</a>
+            <a href="{{ route('tickets.index') }}" class="{{ request()->routeIs('tickets.*') ? 'text-white font-bold' : 'text-slate-300' }}">Tickets</a>
             <a href="#" class="hover:text-synapso-gold transition">Reportes</a>
         </div>
     </div>
