@@ -41,6 +41,7 @@ class TicketController extends Controller
             'description' => 'required|string',
             'priority' => 'required|in:low,medium,high',
             'category_id' => 'required|exists:categories,id',
+            'agent_id' => 'nullable|exists:users,id',
             'due_date' => 'nullable|date',
         ]);
 
