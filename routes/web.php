@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TicketController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -18,3 +19,9 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+
+
+
+Route::resource('tickets', TicketController::class)
+    ->middleware('auth');
