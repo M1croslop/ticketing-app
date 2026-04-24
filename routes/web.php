@@ -25,3 +25,5 @@ require __DIR__.'/auth.php';
 
 Route::resource('tickets', TicketController::class)
     ->middleware('auth');
+require __DIR__ . '/auth.php';
+

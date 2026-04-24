@@ -1,0 +1,215 @@
+Listado de rutas de carpetas
+El número de serie del volumen es B069-5EBE
+C:.
+¦   .editorconfig
+¦   .env.example
+¦   .gitattributes
+¦   .gitignore
+¦   artisan
+¦   composer.json
+¦   composer.lock
+¦   DESIGN copy.md
+¦   DESIGN.md
+¦   package-lock.json
+¦   package.json
+¦   phpunit.xml
+¦   postcss.config.js
+¦   README.md
+¦   structure.txt
+¦   tailwind.config.js
+¦   vite.config.js
+¦   
++---app
+¦   +---Http
+¦   ¦   +---Controllers
+¦   ¦   ¦   ¦   Controller.php
+¦   ¦   ¦   ¦   ProfileController.php
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---Auth
+¦   ¦   ¦           AuthenticatedSessionController.php
+¦   ¦   ¦           ConfirmablePasswordController.php
+¦   ¦   ¦           EmailVerificationNotificationController.php
+¦   ¦   ¦           EmailVerificationPromptController.php
+¦   ¦   ¦           NewPasswordController.php
+¦   ¦   ¦           PasswordController.php
+¦   ¦   ¦           PasswordResetLinkController.php
+¦   ¦   ¦           RegisteredUserController.php
+¦   ¦   ¦           VerifyEmailController.php
+¦   ¦   ¦           
+¦   ¦   +---Requests
+¦   ¦       ¦   ProfileUpdateRequest.php
+¦   ¦       ¦   
+¦   ¦       +---Auth
+¦   ¦               LoginRequest.php
+¦   ¦               
+¦   +---Models
+¦   ¦       Category.php
+¦   ¦       Comment.php
+¦   ¦       Ticket.php
+¦   ¦       TicketStatusLog.php
+¦   ¦       User.php
+¦   ¦       
+¦   +---Providers
+¦   ¦       AppServiceProvider.php
+¦   ¦       
+¦   +---View
+¦       +---Components
+¦               AppLayout.php
+¦               GuestLayout.php
+¦               
++---bootstrap
+¦   ¦   app.php
+¦   ¦   providers.php
+¦   ¦   
+¦   +---cache
+¦           .gitignore
+¦           
++---config
+¦       app.php
+¦       auth.php
+¦       cache.php
+¦       database.php
+¦       filesystems.php
+¦       logging.php
+¦       mail.php
+¦       queue.php
+¦       services.php
+¦       session.php
+¦       
++---database
+¦   ¦   .gitignore
+¦   ¦   
+¦   +---factories
+¦   ¦       CategoryFactory.php
+¦   ¦       TicketFactory.php
+¦   ¦       UserFactory.php
+¦   ¦       
+¦   +---migrations
+¦   ¦       0001_01_01_000000_create_users_table.php
+¦   ¦       0001_01_01_000001_create_cache_table.php
+¦   ¦       0001_01_01_000002_create_jobs_table.php
+¦   ¦       2026_04_18_142314_create_categories_table.php
+¦   ¦       2026_04_18_142323_create_tickets_table.php
+¦   ¦       2026_04_18_142330_create_comments_table.php
+¦   ¦       2026_04_18_142337_create_ticket_status_logs_table.php
+¦   ¦       
+¦   +---seeders
+¦           CategorySeeder.php
+¦           DatabaseSeeder.php
+¦           TicketSeeder.php
+¦           UserSeeder.php
+¦           
++---public
+¦   ¦   .htaccess
+¦   ¦   favicon.ico
+¦   ¦   index.php
+¦   ¦   robots.txt
+¦   ¦   
+¦   +---images
+¦           image.png
+¦           
++---resources
+¦   +---css
+¦   ¦       app.css
+¦   ¦       
+¦   +---js
+¦   ¦       app.js
+¦   ¦       bootstrap.js
+¦   ¦       
+¦   +---views
+¦       ¦   dashboard.blade.php
+¦       ¦   dashboard1.blade.php
+¦       ¦   welcome.blade.php
+¦       ¦   
+¦       +---auth
+¦       ¦       confirm-password.blade.php
+¦       ¦       forgot-password.blade.php
+¦       ¦       login.blade.php
+¦       ¦       register.blade.php
+¦       ¦       reset-password.blade.php
+¦       ¦       verify-email.blade.php
+¦       ¦       
+¦       +---components
+¦       ¦       application-logo.blade.php
+¦       ¦       auth-session-status.blade.php
+¦       ¦       danger-button.blade.php
+¦       ¦       dropdown-link.blade.php
+¦       ¦       dropdown.blade.php
+¦       ¦       input-error.blade.php
+¦       ¦       input-label.blade.php
+¦       ¦       modal.blade.php
+¦       ¦       nav-link.blade.php
+¦       ¦       navbar.blade.php
+¦       ¦       primary-button.blade.php
+¦       ¦       responsive-nav-link.blade.php
+¦       ¦       secondary-button.blade.php
+¦       ¦       sidebar.blade.php
+¦       ¦       text-input.blade.php
+¦       ¦       
+¦       +---layouts
+¦       ¦       app.blade.php
+¦       ¦       guest.blade.php
+¦       ¦       navigation.blade.php
+¦       ¦       
+¦       +---profile
+¦           ¦   edit.blade.php
+¦           ¦   
+¦           +---partials
+¦                   delete-user-form.blade.php
+¦                   update-password-form.blade.php
+¦                   update-profile-information-form.blade.php
+¦                   
++---routes
+¦       auth.php
+¦       console.php
+¦       web.php
+¦       
++---storage
+¦   +---app
+¦   ¦   ¦   .gitignore
+¦   ¦   ¦   
+¦   ¦   +---private
+¦   ¦   ¦       .gitignore
+¦   ¦   ¦       
+¦   ¦   +---public
+¦   ¦           .gitignore
+¦   ¦           
+¦   +---framework
+¦   ¦   ¦   .gitignore
+¦   ¦   ¦   
+¦   ¦   +---cache
+¦   ¦   ¦   ¦   .gitignore
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---data
+¦   ¦   ¦           .gitignore
+¦   ¦   ¦           
+¦   ¦   +---sessions
+¦   ¦   ¦       .gitignore
+¦   ¦   ¦       
+¦   ¦   +---testing
+¦   ¦   ¦       .gitignore
+¦   ¦   ¦       
+¦   ¦   +---views
+¦   ¦           .gitignore
+¦   ¦           
+¦   +---logs
+¦           .gitignore
+¦           
++---tests
+    ¦   TestCase.php
+    ¦   
+    +---Feature
+    ¦   ¦   ExampleTest.php
+    ¦   ¦   ProfileTest.php
+    ¦   ¦   
+    ¦   +---Auth
+    ¦           AuthenticationTest.php
+    ¦           EmailVerificationTest.php
+    ¦           PasswordConfirmationTest.php
+    ¦           PasswordResetTest.php
+    ¦           PasswordUpdateTest.php
+    ¦           RegistrationTest.php
+    ¦           
+    +---Unit
+            ExampleTest.php
+            
