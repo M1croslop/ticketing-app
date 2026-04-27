@@ -76,7 +76,7 @@
             <div class="flex items-center gap-3">
 
                 {{-- Botón Nuevo Ticket --}}
-                <a href="{{ route('tickets.create') }}" class="hidden sm:flex items-center gap-2 bg-synapso-gold hover:bg-amber-600
+                <a href="{{ route('tickets.create') }}" class="hidden sm:flex items-center gap-2 bg-synapso-gold hover:bg-synapso-amber
                           text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md
                           transition-all duration-200 hover:shadow-lg hover:-translate-y-px active:translate-y-0">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -208,7 +208,7 @@
         class="md:hidden border-t border-white/10 bg-synapso-navy" style="display: none;">
         <div class="px-4 py-3 space-y-1">
 
-            <a href="#"
+            <a href="{{ route('dashboard') }}"
                 class="{{ request()->routeIs('dashboard') ? 'bg-white/10 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}
                       flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
