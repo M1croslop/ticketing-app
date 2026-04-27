@@ -30,13 +30,15 @@
 
         {{-- FILTROS --}}
         <div class="mb-4 flex gap-3">
-            <form method="GET" class="flex gap-2">
+            <form id="filter-form" method="GET" class="flex gap-2">
 
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar ticket..."
+                <input id="search-input" type="text" name="search" value="{{ request('search') }}"
+                    placeholder="Buscar ticket..." autocomplete="off"
                     class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-synapso-navy">
 
-                <select name="status" onchange="this.form.submit()"
-                    class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-synapso-navy">
+                <select name="status" id="status-select"
+                    class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-synapso-navy"
+                    onchange="doSearch()">
 
                     <option value="">Todos</option>
                     <option value="open" {{ request('status') == 'open' ? 'selected' : '' }}>Open</option>
@@ -45,10 +47,6 @@
                     <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
 
                 </select>
-
-                <button class="bg-synapso-navy text-white px-4 py-2 rounded-lg text-sm">
-                    Buscar
-                </button>
 
             </form>
         </div>
@@ -68,7 +66,7 @@
                     </tr>
                 </thead>
 
-                <tbody class="divide-y divide-slate-200">
+                <tbody id="tickets-tbody" class="divide-y divide-slate-200">
 
                     @forelse ($tickets as $ticket)
                                 <tr class="hover:bg-slate-50">
@@ -86,7 +84,7 @@
 
                                     {{-- PRIORIDAD --}}
                                     <td class="px-6 py-4">
-                                        <span class="px-2 py-1 text-sm font-semibold rounded                                                                                                                                                                                                               {{ $ticket->priority == 'high' ? 'bg-synapso-priority-high-bg text-synapso-priority-high-text' :
+                                        <span class="px-2 py-1 text-xs font-semibold rounded                                                                                                                                                                                                               {{ $ticket->priority == 'high' ? 'bg-synapso-priority-high-bg text-synapso-priority-high-text' :
                         ($ticket->priority == 'medium' ? 'bg-synapso-priority-mid-bg text-synapso-priority-mid-text' :
                             'bg-synapso-priority-low-bg text-synapso-priority-low-text') }}">
                                             {{ strtoupper($ticket->priority) }}
@@ -101,7 +99,7 @@
                                     {{-- ESTADO --}}
                                     <td class="px-6 py-4">
                                         <span class="px-2 py-1 text-sm font-semibold rounded whitespace-nowrap
-                                                                        {{ $ticket->status == 'in_progress' ? 'bg-synapso-status-progress-bg text-synapso-status-progress-text' :
+                                                                                                                                                                                                                                                                                                        {{ $ticket->status == 'in_progress' ? 'bg-synapso-status-progress-bg text-synapso-status-progress-text' :
                         ($ticket->status == 'closed' || $ticket->status == 'done' ? 'bg-synapso-status-done-bg text-synapso-status-done-text' :
                             'bg-synapso-status-open-bg text-synapso-status-open-text') }}">
                                             {{ ucfirst(str_replace('_', '-', $ticket->status)) }}
@@ -113,24 +111,26 @@
                                         <div class="flex items-center justify-center gap-1.5">
 
                                             {{-- VER DETALLES --}}
-                                            <a href="{{ route('tickets.show', $ticket) }}" title="Ver detalles" class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-transparent
-                                                                                       text-slate-400 hover:text-synapso-navy hover:bg-slate-50 hover:border-synapso-navy
-                                                                                       transition-all duration-150">
+                                            <a href="{{ route('tickets.show', $ticket) }}" title="Ver detalles"
+                                                class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-transparent
+                                                                                                                                                                                                                                                                                                                       text-slate-400 hover:text-synapso-navy hover:bg-slate-50 hover:border-synapso-navy
+                                                                                                                                                                                                                                                                                                                       transition-all duration-150">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
-                                                                                           a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                                                                                                                                                                                                                                                                                                           a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
                                             </a>
 
                                             {{-- EDITAR --}}
-                                            <a href="{{ route('tickets.edit', $ticket) }}" title="Editar ticket" class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-transparent
-                                                                                       text-slate-400 hover:text-synapso-gold hover:bg-amber-50 hover:border-synapso-gold
-                                                                                       transition-all duration-150">
+                                            <a href="{{ route('tickets.edit', $ticket) }}" title="Editar ticket"
+                                                class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-transparent
+                                                                                                                                                                                                                                                                                                                       text-slate-400 hover:text-synapso-gold hover:bg-amber-50 hover:border-synapso-gold
+                                                                                                                                                                                                                                                                                                                       transition-all duration-150">
                                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                         d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5
-                                                                                           m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                                                                                                                                                                                                                                                                                           m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                 </svg>
                                             </a>
 
@@ -138,13 +138,14 @@
                                             <form action="{{ route('tickets.destroy', $ticket) }}" method="POST">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" title="Borrar ticket"
-                                                    onclick="return confirm('¿Deseas borrar este ticket?')" class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-transparent
-                                                                                           text-slate-400 hover:text-synapso-danger hover:bg-red-50 hover:border-synapso-danger
-                                                                                           transition-all duration-150">
+                                                    onclick="return confirm('¿Deseas borrar este ticket?')"
+                                                    class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-transparent
+                                                                                                                                                                                                                                                                                                                           text-slate-400 hover:text-synapso-danger hover:bg-red-50 hover:border-synapso-danger
+                                                                                                                                                                                                                                                                                                                           transition-all duration-150">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                             d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858
-                                                                                               L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                                                                                                                                                                                                                                                                               L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
                                                 </button>
                                             </form>
@@ -171,4 +172,52 @@
         </div>
 
     </div>
+
+    {{-- BUSQUEDA DINAMICA (fetch) --}}
+    <script>
+        function doSearch() {
+            const input = document.getElementById('search-input');
+            const select = document.getElementById('status-select');
+            const tbody = document.getElementById('tickets-tbody');
+
+            const params = new URLSearchParams();
+            if (input.value) params.set('search', input.value);
+            if (select.value) params.set('status', select.value);
+
+            const url = '{{ route('tickets.index') }}?' + params.toString();
+
+            // Indicador visual sutil de carga
+            tbody.style.opacity = '0.4';
+            tbody.style.transition = 'opacity 0.15s';
+
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(res => res.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const newTbody = doc.getElementById('tickets-tbody');
+
+                    if (newTbody) {
+                        tbody.innerHTML = newTbody.innerHTML;
+                    }
+
+                    history.pushState(null, '', url);
+
+                    tbody.style.opacity = '1';
+                })
+                .catch(() => { tbody.style.opacity = '1'; });
+        }
+
+        // Debounce
+        (function () {
+            const input = document.getElementById('search-input');
+            let timer;
+
+            input.addEventListener('input', function () {
+                clearTimeout(timer);
+                timer = setTimeout(doSearch, 350);
+            });
+        })();
+    </script>
+
 @endsection
