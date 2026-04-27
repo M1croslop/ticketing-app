@@ -17,8 +17,14 @@ class TicketController extends Controller
      */
     public function index()
     {
-        $tickets = Ticket::with(['user', 'agent', 'category'])->latest()->paginate(10);
-        return view('tickets.index', compact('tickets'));
+           $tickets = Ticket::with(['user', 'agent', 'category'])
+        ->when(request('status'), fn($q, $status) => $q->where('status', $status))
+        ->when(request('search'), fn($q, $search) => $q->where('title', 'like', "%$search%"))
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
+
+    return view('tickets.index', compact('tickets'));
     }
 
     /**

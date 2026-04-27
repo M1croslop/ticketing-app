@@ -26,6 +26,8 @@ export default {
                 sans: ['Inter', ...defaultTheme.fontFamily.sans],
             },
 
+            
+
         },
     },
 
