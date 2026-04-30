@@ -120,7 +120,7 @@
                                                                                                                                                                                                                                                                                                                            a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
                                             </a>
-
+                                            @if(auth()->id() === $ticket->user_id)
                                             {{-- EDITAR --}}
                                             <a href="{{ route('tickets.edit', $ticket) }}" title="Editar ticket"
                                                 class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-transparent
@@ -148,7 +148,7 @@
                                                     </svg>
                                                 </button>
                                             </form>
-
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
