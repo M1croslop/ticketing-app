@@ -35,7 +35,7 @@ class TicketController extends Controller
     public function create()
     {
         $categories = Category::all();
-        $agents = User::all(); 
+        $agents = User::where('role', 'agent')->orWhere('role', 'admin')->get();
         return view('tickets.create', compact('categories', 'agents'));
     }
 
@@ -71,7 +71,7 @@ class TicketController extends Controller
     public function edit(Ticket $ticket)
     {
         $categories = Category::all();
-        $agents = User::all();
+        $agents = User::where('role', 'agent')->orWhere('role', 'admin')->get();
         return view('tickets.edit', compact('ticket', 'categories', 'agents'));
     }
 
