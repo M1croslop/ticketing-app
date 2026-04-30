@@ -27,6 +27,8 @@ export default {
                     'priority-mid-text': '#791E00',
                     'priority-high-bg': '#FECACA',
                     'priority-high-text': '#7a1717',
+                    'priority-urgent-bg': '#fce7f3',
+                    'priority-urgent-text': '#831843',
                     // Status badges
                     'status-open-bg': '#e9d5ff',
                     'status-open-text': '#652d91',

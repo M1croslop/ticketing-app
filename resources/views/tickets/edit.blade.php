@@ -61,11 +61,16 @@
                         <select name="priority"
                             class="w-full border border-slate-300 rounded-lg px-3 py-2">
 
-                            <option value="low" {{ $ticket->priority == 'low' ? 'selected' : '' }}>Low</option>
-                            <option value="medium" {{ $ticket->priority == 'medium' ? 'selected' : '' }}>Medium</option>
-                            <option value="high" {{ $ticket->priority == 'high' ? 'selected' : '' }}>High</option>
+                            @foreach(\App\Models\Ticket::PRIORITIES as $priority)
+                                <option value="{{ $priority }}" @selected(old('priority', $ticket->priority) === $priority)>
+                                    {{ ucfirst($priority) }}
+                                </option>
+                            @endforeach
 
                         </select>
+                        @error('priority')
+                            <p class="text-synapso-danger text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     {{-- CATEGORIA --}}

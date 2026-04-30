@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+
 class Ticket extends Model
 {
     use HasFactory, SoftDeletes;
+    const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
 
     protected $fillable = [
         'title',
