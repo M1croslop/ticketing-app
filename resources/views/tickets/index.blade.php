@@ -98,8 +98,7 @@
 
                                     {{-- ESTADO --}}
                                     <td class="px-6 py-4">
-                                        <span class="px-2 py-1 text-sm font-semibold rounded whitespace-nowrap
-                                                                                                                                                                                                                                                                                                        {{ $ticket->status == 'in_progress' ? 'bg-synapso-status-progress-bg text-synapso-status-progress-text' :
+                                        <span class="px-2 py-1 text-sm font-semibold rounded whitespace-nowrap {{ $ticket->status == 'in_progress' ? 'bg-synapso-status-progress-bg text-synapso-status-progress-text' :
                         ($ticket->status == 'closed' || $ticket->status == 'done' ? 'bg-synapso-status-done-bg text-synapso-status-done-text' :
                             'bg-synapso-status-open-bg text-synapso-status-open-text') }}">
                                             {{ ucfirst(str_replace('_', '-', $ticket->status)) }}
