@@ -30,24 +30,24 @@
 
         {{-- FILTROS --}}
         <div class="mb-4 flex gap-3">
-            <form id="filter-form" method="GET" class="flex gap-2">
-
+            <form id="filter-form" method="GET" action="{{ route('tickets.index') }}" class="flex gap-2">
+ 
                 <input id="search-input" type="text" name="search" value="{{ request('search') }}"
                     placeholder="Buscar ticket..." autocomplete="off"
                     class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-synapso-navy">
-
+ 
                 <select name="status" id="status-select"
                     class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-synapso-navy"
                     onchange="doSearch()">
-
+ 
                     <option value="">Todos</option>
                     <option value="open" {{ request('status') == 'open' ? 'selected' : '' }}>Open</option>
                     <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress
                     </option>
                     <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
-
+ 
                 </select>
-
+ 
             </form>
         </div>
 
