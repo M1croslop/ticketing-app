@@ -135,7 +135,35 @@
 
             </div>
         </div>
-
+        
+        {{-- CERRADOS --}}
+        <div class="flex-shrink-0 w-80 bg-slate-100 rounded-lg p-3 flex flex-col max-h-[70vh]">
+ 
+            <h3 class="font-bold text-slate-700 mb-3 flex justify-between items-center">
+                CERRADOS
+                <span class="bg-slate-300 px-2 rounded text-xs">
+                    {{ $closedTickets->count() }}
+                </span>
+            </h3>
+ 
+            <div class="space-y-3 overflow-y-auto pr-1 opacity-50">
+ 
+                @foreach($closedTickets as $ticket)
+                    <div class="card">
+ 
+                        <p class="font-semibold text-slate-500 line-through">
+                            {{ $ticket->title }}
+                        </p>
+ 
+                        <p class="text-xs text-slate-400">
+                            {{ $ticket->updated_at->diffForHumans() }}
+                        </p>
+ 
+                    </div>
+                @endforeach
+ 
+            </div>
+        </div>
     </div>
 
         </div>

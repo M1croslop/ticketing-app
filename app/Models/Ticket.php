@@ -13,6 +13,8 @@ class Ticket extends Model
 {
     use HasFactory, SoftDeletes;
     const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
+    const STATUSES   = ['open', 'in_progress', 'resolved', 'closed'];
+
 
     protected $fillable = [
         'title',

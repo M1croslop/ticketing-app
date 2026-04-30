@@ -27,6 +27,7 @@ class UpdateTicketRequest extends FormRequest
         return [
             'title'       => 'required|string|min:5|max:150',
             'description' => 'required|string|min:10',
+            'status'      => ['required', 'in:' . implode(',', Ticket::STATUSES)],
             'priority'    => ['required', 'in:' . implode(',', Ticket::PRIORITIES)],
             'category_id' => 'required|exists:categories,id',
         ];
