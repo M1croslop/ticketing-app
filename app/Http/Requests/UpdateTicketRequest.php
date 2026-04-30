@@ -30,6 +30,8 @@ class UpdateTicketRequest extends FormRequest
             'status'      => ['required', 'in:' . implode(',', Ticket::STATUSES)],
             'priority'    => ['required', 'in:' . implode(',', Ticket::PRIORITIES)],
             'category_id' => 'required|exists:categories,id',
+            'agent_id'    => 'nullable|exists:users,id',
+            'due_date'    => 'nullable|date|after_or_equal:today',
         ];
     }
 }
