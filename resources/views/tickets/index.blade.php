@@ -21,12 +21,6 @@
             </a>
         </div>
 
-        {{-- ALERTA --}}
-        @if (session('status'))
-            <div class="mb-4 p-4 border-l-4 border-synapso-success bg-green-50 text-synapso-success">
-                {{ session('status') }}
-            </div>
-        @endif
 
         {{-- FILTROS --}}
         <div class="mb-4 flex gap-3">

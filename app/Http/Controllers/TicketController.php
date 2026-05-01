@@ -53,12 +53,17 @@ class TicketController extends Controller
 
         // OJO Asignamos el ID del usuario autenticado automáticamente
         $validated['user_id'] = Auth::id();
-        $validated['status'] = 'open';  
+        $validated['status'] = 'open';
 
-        Ticket::create($validated);
+        try {
+            Ticket::create($validated);
 
-        return redirect()->route('tickets.index')
-            ->with('status', 'Ticket creado con éxito.');
+            return redirect()->route('tickets.index')
+                ->with('success', 'Ticket creado con éxito.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'No se pudo crear el ticket. Intenta de nuevo.');
+        }
     }
 
     /**
@@ -103,7 +108,7 @@ class TicketController extends Controller
         $ticket->update($validated);
 
         return redirect()->route('tickets.index')
-            ->with('status', 'Ticket actualizado correctamente.');
+            ->with('success', 'Ticket actualizado correctamente.');
     }
 
     /**
@@ -111,9 +116,15 @@ class TicketController extends Controller
      */
     public function destroy(Ticket $ticket)
     {
+        // Solo el propietario del ticket o un admin pueden eliminarlo
+        if (Auth::id() !== $ticket->user_id && Auth::user()->role !== 'admin') {
+            return redirect()->route('tickets.index')
+                ->with('error', 'No tienes permisos para eliminar este ticket.');
+        }
+
         $ticket->delete();
 
         return redirect()->route('tickets.index')
-            ->with('status', 'Ticket enviado a la papelera.');
+            ->with('warning', 'Ticket enviado a la papelera.');
     }
 }
