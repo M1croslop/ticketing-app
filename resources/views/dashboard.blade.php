@@ -12,117 +12,159 @@
 
             <div class="card">
                 <p class="text-slate-500 text-sm font-semibold uppercase">Tickets Abiertos</p>
-                <p class="text-3xl font-bold text-slate-800">24</p>
+                <p class="text-3xl font-bold text-slate-800">{{ $openCount }}</p>
             </div>
 
             <div class="card">
-                <p class="text-slate-500 text-sm font-semibold uppercase">Avg. resolution time</p>
-                <p class="text-3xl font-bold text-slate-800">8h</p>
+                <p class="text-slate-500 text-sm font-semibold uppercase">Tiempo Promedio de Resolución</p>
+                <p class="text-3xl font-bold text-slate-800">
+                {{ $avgResolutionTime ? round($avgResolutionTime) . 'h' : '—' }}
+                </p>
             </div>
 
 
             <div class="card">
-                <p class="text-slate-500 text-sm font-semibold uppercase">Resueltos Hoy</p>
-                <p class="text-3xl font-bold text-synapso-success">12</p>
+                <p class="text-slate-500 text-sm font-semibold uppercase">Tickets Resueltos</p>
+                <p class="text-3xl font-bold text-synapso-success">
+                    {{ $resolvedToday }}
+                </p>
             </div>
 
         </div>
 
         <!-- KANBAN -->
-        <div class="flex space-x-4 overflow-x-auto pb-4">
+       <div class="flex gap-4 overflow-x-auto pb-4">
 
-            <!-- NUEVOS -->
-            <div class="flex-shrink-0 w-80 bg-slate-100 p-3 rounded-lg">
-                <h3 class="font-bold text-slate-700 mb-4 flex justify-between">
-                    NUEVOS <span class="bg-slate-300 px-2 rounded text-sm">3</span>
-                </h3>
+        {{-- NUEVOS --}}
+        <div class="flex-shrink-0 w-80 bg-slate-100 rounded-lg p-3 flex flex-col max-h-[70vh]">
 
-                <div class="space-y-3">
+            <h3 class="font-bold text-slate-700 mb-3 flex justify-between items-center">
+                NUEVOS
+                <span class="bg-slate-300 px-2 rounded text-xs">
+                    {{ $newTickets->count() }}
+                </span>
+            </h3>
 
+            <div class="space-y-3 overflow-y-auto pr-1">
+
+                @foreach($newTickets as $ticket)
                     <div class="card">
 
-                        <span class="badge-critical">
-                            Prioridad Crítica
+                        <span class="text-xs font-semibold text-synapso-danger">
+                            {{ strtoupper($ticket->priority) }}
                         </span>
 
                         <p class="font-semibold text-slate-800 mt-1">
-                            Falla crítica en VPN
+                            {{ $ticket->title }}
                         </p>
 
                         <p class="text-sm text-slate-500">
-                            Usuario: Roberto M.
+                            {{ $ticket->user->name }}
                         </p>
 
-                        <div class="mt-4 flex justify-between items-center">
-                            <span class="text-xs text-slate-400">
-                                Hace 15 min
-                            </span>
-
-                            <button class="text-synapso-gold text-sm font-bold hover:underline">
-                                Tomar Caso
-                            </button>
-                        </div>
+                        <p class="text-xs text-slate-400 mt-2">
+                            {{ $ticket->created_at->diffForHumans() }}
+                        </p>
 
                     </div>
+                @endforeach
 
-                </div>
             </div>
+        </div>
 
-            <!-- EN PROGRESO -->
-            <div class="flex-shrink-0 w-80 bg-slate-100 p-3 rounded-lg">
-                <h3 class="font-bold text-slate-700 mb-4 flex justify-between">
-                    EN PROGRESO <span class="bg-slate-300 px-2 rounded text-sm">2</span>
-                </h3>
 
-                <div class="space-y-3">
+        {{-- EN PROGRESO --}}
+        <div class="flex-shrink-0 w-80 bg-slate-100 rounded-lg p-3 flex flex-col max-h-[70vh]">
 
+            <h3 class="font-bold text-slate-700 mb-3 flex justify-between items-center">
+                EN PROGRESO
+                <span class="bg-slate-300 px-2 rounded text-xs">
+                    {{ $inProgressTickets->count() }}
+                </span>
+            </h3>
+
+            <div class="space-y-3 overflow-y-auto pr-1">
+
+                @foreach($inProgressTickets as $ticket)
                     <div class="card">
 
-                        <span class="badge-high">
-                            Prioridad Media
+                        <span class="text-xs font-semibold text-amber-600">
+                            {{ strtoupper($ticket->priority) }}
                         </span>
 
                         <p class="font-semibold text-slate-800 mt-1">
-                            Configuración Outlook
+                            {{ $ticket->title }}
                         </p>
 
                         <p class="text-sm text-slate-500">
-                            Agente: Alexis C.
+                            {{ $ticket->agent->name ?? 'Sin asignar' }}
                         </p>
 
-                        <div class="mt-4 flex justify-end">
-                            <div class="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-xs">
-                                AC
-                            </div>
-                        </div>
-
                     </div>
+                @endforeach
 
-                </div>
             </div>
+        </div>
 
-            <!-- RESUELTOS -->
-            <div class="flex-shrink-0 w-80 bg-slate-100 p-3 rounded-lg">
-                <h3 class="font-bold text-slate-700 mb-4 flex justify-between">
-                    RESUELTOS <span class="bg-slate-300 px-2 rounded text-sm">15</span>
-                </h3>
 
-                <div class="space-y-3 opacity-70">
+        {{-- RESUELTOS --}}
+        <div class="flex-shrink-0 w-80 bg-slate-100 rounded-lg p-3 flex flex-col max-h-[70vh]">
 
+            <h3 class="font-bold text-slate-700 mb-3 flex justify-between items-center">
+                RESUELTOS
+                <span class="bg-slate-300 px-2 rounded text-xs">
+                    {{ $resolvedTickets->count() }}
+                </span>
+            </h3>
+
+            <div class="space-y-3 overflow-y-auto pr-1 opacity-70">
+
+                @foreach($resolvedTickets as $ticket)
                     <div class="card">
 
                         <p class="font-semibold text-slate-800 line-through">
-                            Recuperación de contraseña
+                            {{ $ticket->title }}
                         </p>
 
-                        <p class="text-sm text-slate-500 italic">
-                            Cerrado hace 1h
+                        <p class="text-xs text-slate-500">
+                            {{ $ticket->updated_at->diffForHumans() }}
                         </p>
 
                     </div>
+                @endforeach
 
-                </div>
             </div>
+        </div>
+        
+        {{-- CERRADOS --}}
+        <div class="flex-shrink-0 w-80 bg-slate-100 rounded-lg p-3 flex flex-col max-h-[70vh]">
+ 
+            <h3 class="font-bold text-slate-700 mb-3 flex justify-between items-center">
+                CERRADOS
+                <span class="bg-slate-300 px-2 rounded text-xs">
+                    {{ $closedTickets->count() }}
+                </span>
+            </h3>
+ 
+            <div class="space-y-3 overflow-y-auto pr-1 opacity-50">
+ 
+                @foreach($closedTickets as $ticket)
+                    <div class="card">
+ 
+                        <p class="font-semibold text-slate-500 line-through">
+                            {{ $ticket->title }}
+                        </p>
+ 
+                        <p class="text-xs text-slate-400">
+                            {{ $ticket->updated_at->diffForHumans() }}
+                        </p>
+ 
+                    </div>
+                @endforeach
+ 
+            </div>
+        </div>
+    </div>
 
         </div>
 

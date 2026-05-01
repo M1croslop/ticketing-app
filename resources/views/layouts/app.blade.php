@@ -14,7 +14,7 @@
 <body class="bg-synapso-bg font-sans antialiased">
     @include('components.navbar')
     <main>
-        <!-- <x-alert /> <- agregar cuando creen el componente de alertas en Sprint 1 -->
+        {{-- <x-alert /> agregar cuando creen el componente de alertas en Sprint 1 --}}
         @yield('content')
     </main>
 </body>
