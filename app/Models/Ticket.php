@@ -7,13 +7,67 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 
 class Ticket extends Model
 {
     use HasFactory, SoftDeletes;
+
     const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
     const STATUSES   = ['open', 'in_progress', 'resolved', 'closed'];
+
+    /**
+     * Mapa SLA: prioridad → tiempo límite en horas.
+     * Se usa al crear el ticket para calcular due_date automáticamente.
+     */
+    private const SLA_HOURS = [
+        'urgent' => 4,
+        'high'   => 24,
+        'medium' => 72,
+        'low'    => 168,
+    ];
+
+    /**
+     * Boot del modelo.
+     *
+     * Reglas SLA:
+     *  - creating : solo calcula due_date si el ticket ya viene con agente
+     *               y aún no tiene due_date manual.
+     *  - updating : calcula due_date la primera vez que se asigna un agente
+     *               (agent_id pasó de null → valor) y due_date sigue vacío.
+     */
+    protected static function booted(): void
+    {
+        // Al CREAR: solo si viene con agente asignado desde el inicio
+        static::creating(function (Ticket $ticket): void {
+            if ($ticket->agent_id && ! $ticket->due_date) {
+                $ticket->due_date = self::calculateDueDate($ticket->priority);
+            }
+        });
+
+        // Al ACTUALIZAR: primera asignación de agente (null → id)
+        static::updating(function (Ticket $ticket): void {
+            $agentJustAssigned = $ticket->isDirty('agent_id')
+                && $ticket->getOriginal('agent_id') === null
+                && $ticket->agent_id !== null;
+
+            if ($agentJustAssigned && ! $ticket->due_date) {
+                $ticket->due_date = self::calculateDueDate($ticket->priority);
+            }
+        });
+    }
+
+    /**
+     * Calcula el due_date a partir de la prioridad del ticket.
+     * Método privado reutilizado por los dos listeners del booted().
+     */
+    private static function calculateDueDate(string $priority): Carbon
+    {
+        $hours = self::SLA_HOURS[$priority] ?? 72;
+
+        return Carbon::now()->addHours($hours);
+    }
 
 
     protected $fillable = [
