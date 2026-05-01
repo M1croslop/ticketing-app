@@ -8,6 +8,8 @@ use App\Models\Category;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreTicketRequest;
+use App\Http\Requests\UpdateTicketRequest;
 
 
 class TicketController extends Controller
@@ -33,25 +35,18 @@ class TicketController extends Controller
     public function create()
     {
         $categories = Category::all();
-        $agents = User::all(); 
+        $agents = User::where('role', 'agent')->orWhere('role', 'admin')->get();
         return view('tickets.create', compact('categories', 'agents'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreTicketRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'priority' => 'required|in:low,medium,high',
-            'category_id' => 'required|exists:categories,id',
-            'agent_id' => 'nullable|exists:users,id',
-            'due_date' => 'nullable|date',
-        ]);
+        $validated = $request->validated();
 
-        // OJO Asignamos el ID del usuario autenticado automáticamente
+        // Asignamos el ID del usuario autenticado automáticamente
         $validated['user_id'] = Auth::id();
         $validated['status'] = 'open';
 
@@ -81,26 +76,17 @@ class TicketController extends Controller
     public function edit(Ticket $ticket)
     {
         $categories = Category::all();
-        $agents = User::all();
+        $agents = User::where('role', 'agent')->orWhere('role', 'admin')->get();
         return view('tickets.edit', compact('ticket', 'categories', 'agents'));
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Ticket $ticket)
+    public function update(UpdateTicketRequest $request, Ticket $ticket)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'status' => 'required|string',
-            'priority' => 'required|in:low,medium,high',
-            'agent_id' => 'nullable|exists:users,id',
-            'category_id' => 'required|exists:categories,id',
-            'due_date' => 'nullable|date',
-        ]);
+        $validated = $request->validated();
 
-        //
         if ($request->status === 'resolved' && !$ticket->resolved_at) {
             $validated['resolved_at'] = now();
         }

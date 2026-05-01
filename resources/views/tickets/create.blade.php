@@ -45,11 +45,14 @@
                             <option value="">Seleccionar</option>
 
                             @foreach($categories as $category)
-                                <option value="{{ $category->id }}">
+                                <option value="{{ $category->id }}" @selected(old('category_id') == $category->id)>
                                     {{ $category->name }}
                                 </option>
                             @endforeach
                         </select>
+                        @error('category_id')
+                            <p class="text-synapso-danger text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     {{-- AGENTE --}}
@@ -83,11 +86,16 @@
                         <select name="priority"
                             class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
 
-                            <option value="low">Baja</option>
-                            <option value="medium" selected>Media</option>
-                            <option value="high">Alta</option>
+                            @foreach(\App\Models\Ticket::PRIORITIES as $priority)
+                                <option value="{{ $priority }}" @selected(old('priority', 'medium') === $priority)>
+                                    {{ ucfirst($priority) }}
+                                </option>
+                            @endforeach
 
                         </select>
+                        @error('priority')
+                            <p class="text-synapso-danger text-xs mt-1">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     {{-- FECHA --}}
@@ -107,7 +115,10 @@
                         Descripción
                     </label>
                     <textarea name="description" rows="4"
-                        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
+                        class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">{{ old('description') }}</textarea>
+                    @error('description')
+                        <p class="text-synapso-danger text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 {{-- ACTIONS --}}

@@ -24,24 +24,24 @@
 
         {{-- FILTROS --}}
         <div class="mb-4 flex gap-3">
-            <form id="filter-form" method="GET" class="flex gap-2">
-
+            <form id="filter-form" method="GET" action="{{ route('tickets.index') }}" class="flex gap-2">
+ 
                 <input id="search-input" type="text" name="search" value="{{ request('search') }}"
                     placeholder="Buscar ticket..." autocomplete="off"
                     class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-synapso-navy">
-
+ 
                 <select name="status" id="status-select"
                     class="border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-1 focus:ring-synapso-navy"
                     onchange="doSearch()">
-
+ 
                     <option value="">Todos</option>
                     <option value="open" {{ request('status') == 'open' ? 'selected' : '' }}>Open</option>
                     <option value="in_progress" {{ request('status') == 'in_progress' ? 'selected' : '' }}>In Progress
                     </option>
                     <option value="resolved" {{ request('status') == 'resolved' ? 'selected' : '' }}>Resolved</option>
-
+ 
                 </select>
-
+ 
             </form>
         </div>
 
@@ -92,8 +92,7 @@
 
                                     {{-- ESTADO --}}
                                     <td class="px-6 py-4">
-                                        <span class="px-2 py-1 text-sm font-semibold rounded whitespace-nowrap
-                                                                                                                                                                                                                                                                                                        {{ $ticket->status == 'in_progress' ? 'bg-synapso-status-progress-bg text-synapso-status-progress-text' :
+                                        <span class="px-2 py-1 text-sm font-semibold rounded whitespace-nowrap {{ $ticket->status == 'in_progress' ? 'bg-synapso-status-progress-bg text-synapso-status-progress-text' :
                         ($ticket->status == 'closed' || $ticket->status == 'done' ? 'bg-synapso-status-done-bg text-synapso-status-done-text' :
                             'bg-synapso-status-open-bg text-synapso-status-open-text') }}">
                                             {{ ucfirst(str_replace('_', '-', $ticket->status)) }}
@@ -115,7 +114,7 @@
                                                                                                                                                                                                                                                                                                                            a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
                                             </a>
-
+                                            @if(auth()->id() === $ticket->user_id)
                                             {{-- EDITAR --}}
                                             <a href="{{ route('tickets.edit', $ticket) }}" title="Editar ticket"
                                                 class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-transparent
@@ -143,7 +142,7 @@
                                                     </svg>
                                                 </button>
                                             </form>
-
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>

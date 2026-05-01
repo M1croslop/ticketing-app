@@ -44,6 +44,11 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
+        $closedTickets = Ticket::with('user')
+        ->where('status', 'closed')
+        ->latest()
+        ->take(5)
+        ->get();
         //RETORNO
 
         return view('dashboard', compact(
@@ -52,7 +57,8 @@ class DashboardController extends Controller
             'avgResolutionTime',
             'newTickets',
             'inProgressTickets',
-            'resolvedTickets'
+            'resolvedTickets',
+            'closedTickets',
         ));
     }
 }

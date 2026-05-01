@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Ticket;
 
 class StoreTicketRequest extends FormRequest
 {
@@ -25,7 +26,7 @@ class StoreTicketRequest extends FormRequest
         return [
             'title'       => 'required|string|min:5|max:150',
             'description' => 'required|string|min:10',
-            'priority'    => 'required|in:low,medium,high,urgent',
+            'priority'    => ['required', 'in:' . implode(',', Ticket::PRIORITIES)],
             'category_id' => 'required|exists:categories,id',
         ];
     }
