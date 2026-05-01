@@ -30,13 +30,18 @@ class CommentController extends Controller
      */
     public function store(Request $request, Ticket $ticket)
     {
+
+        $user = Auth::user();
+        if ($user->role !== 'admin' && $user->role !== 'agent' && $user->id !== $ticket->user_id) {
+            abort(403, 'No tienes permisos para comentar en este ticket.');
+        }
         $request->validate([
             'body' => 'required|string|min:2'
         ]);
 
         $ticket->comments()->create([
             'body' => $request->body,
-            'user_id' => Auth::id(),
+            'user_id' => $user->id,
         ]);
 
         return back()->with('success', 'Comentario agregado');
