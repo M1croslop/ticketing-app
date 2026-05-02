@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -16,7 +17,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        return view('auth.login');
+        try {
+            DB::connection()->getPdo();
+            $dbOnline = true;
+        } catch (\Exception) {
+            $dbOnline = false;
+        }
+
+        return view('auth.login', compact('dbOnline'));
     }
 
     /**
