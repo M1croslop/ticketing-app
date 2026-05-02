@@ -46,7 +46,6 @@ class TicketController extends Controller
     {
         $validated = $request->validated();
 
-        // Asignamos el ID del usuario autenticado automáticamente
         $validated['user_id'] = Auth::id();
         $validated['status'] = 'open';
 
@@ -88,14 +87,10 @@ class TicketController extends Controller
     {
         $validated = $request->validated();
 
-        if ($request->status === 'resolved' && !$ticket->resolved_at) {
-            $validated['resolved_at'] = now();
-        }
-
         $ticket->update($validated);
 
         return redirect()->route('tickets.index')
-            ->with('success', 'Ticket actualizado correctamente.');
+        ->with('success', 'Ticket actualizado correctamente.');
     }
 
     /**
@@ -103,7 +98,6 @@ class TicketController extends Controller
      */
     public function destroy(Ticket $ticket)
     {
-        // Solo el propietario del ticket o un admin pueden eliminarlo
         if (Auth::id() !== $ticket->user_id && Auth::user()->role !== 'admin') {
             return redirect()->route('tickets.index')
                 ->with('error', 'No tienes permisos para eliminar este ticket.');

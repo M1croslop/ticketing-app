@@ -55,6 +55,16 @@ class Ticket extends Model
             if ($agentJustAssigned && ! $ticket->due_date) {
                 $ticket->due_date = self::calculateDueDate($ticket->priority);
             }
+
+            // cambio de status a resolved/closed, guardar fecha de resolución
+            if (
+                $ticket->isDirty('status') &&
+                in_array($ticket->status, ['resolved', 'closed']) &&
+                is_null($ticket->resolved_at)
+            ) {
+                $ticket->resolved_at = now();
+            }
+
         });
     }
 
