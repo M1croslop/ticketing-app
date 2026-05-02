@@ -66,8 +66,9 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket)
     {
-        $ticket->load(['user', 'agent', 'category', 'comments.user']);
-        return view('tickets.show', compact('ticket'));
+        $ticket->load(['user', 'agent', 'category', 'comments.user', 'statusLogs.user']);
+        $agents = User::where('role', 'agent')->orWhere('role', 'admin')->get();
+        return view('tickets.show', compact('ticket', 'agents'));
     }
 
     /**
