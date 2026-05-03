@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use App\Models\TicketStatusLog;
 
 
 class Ticket extends Model
@@ -63,6 +64,16 @@ class Ticket extends Model
                 is_null($ticket->resolved_at)
             ) {
                 $ticket->resolved_at = now();
+            }
+
+            if ($ticket->isDirty('status')) {
+                TicketStatusLog::create([
+                    'ticket_id'  => $ticket->id,
+                    'changed_by' => auth()->id(),
+                    'old_status' => $ticket->getOriginal('status'),
+                    'new_status' => $ticket->status,
+                    'changed_at' => now(),
+                ]);
             }
 
         });
