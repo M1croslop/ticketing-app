@@ -7,7 +7,7 @@
         $avatar = strtoupper(substr($user->name, 0, 1));
 
         // Role display
-        $roleLabels = ['admin' => 'Admin', 'agent' => 'Agente', 'user' => 'Usuario'];
+        $roleLabels = ['admin' => 'Admin', 'agent' => 'Agente', 'client' => 'Cliente'];
         $roleLabel = $roleLabels[$user->role] ?? ucfirst($user->role ?? 'Usuario');
 
         // Role badge

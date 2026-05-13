@@ -100,6 +100,8 @@
                                                                                     flex items-center justify-center mt-0.5"
                             aria-hidden="true">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                {{-- NOTA: Se renderiza HTML sin escapar ({!! !!}) porque el array de íconos 
+                                     debe mantenerse estrictamente dentro de este componente. No inyectar valores externos. --}}
                                 {!! $alert['icon'] !!}
                             </svg>
                         </div>

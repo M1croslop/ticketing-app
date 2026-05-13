@@ -49,20 +49,13 @@
                     <p class="text-sm font-semibold text-slate-800">{{ $ticket->category->name ?? 'General' }}</p>
                 </div>
 
-                @php
-                    $user     = Auth::user();
-                    $isAdmin  = $user->role === 'admin';
-                    $isAgent  = $user->role === 'agent' && $ticket->agent_id === $user->id;
-                    $canEdit  = $isAdmin || $isAgent;
-                @endphp
-
                 <div>
                     <h3 class="text-xs font-bold text-slate-400 uppercase mb-1">Estado</h3>
 
                     @if($canEdit)
                         <form method="POST" action="{{ route('tickets.update', $ticket) }}">
                             @csrf @method('PATCH')
-                            <select name="status" onchange="this.form.submit()"
+                            <select name="status" onchange="if(confirm('¿Confirmas el cambio de estado?')) this.form.submit();"
                                 class="w-full border border-slate-300 rounded-lg px-2 py-1.5 text-sm">
                                 @foreach(\App\Models\Ticket::STATUSES as $status)
                                     <option value="{{ $status }}" @selected($ticket->status === $status)>
@@ -81,7 +74,7 @@
                 <div>
                     <h3 class="text-xs font-bold text-slate-400 uppercase mb-1">Prioridad</h3>
 
-                    @if($isAdmin)
+                    @if(auth()->user()->role === 'admin')
                         <form method="POST" action="{{ route('tickets.update', $ticket) }}">
                             @csrf @method('PATCH')
                             <select name="priority" onchange="this.form.submit()"
@@ -101,7 +94,7 @@
                 <div>
                     <h3 class="text-xs font-bold text-slate-400 uppercase mb-1">Asignado a</h3>
 
-                    @if($isAdmin)
+                    @if(auth()->user()->role === 'admin')
                         <form method="POST" action="{{ route('tickets.update', $ticket) }}">
                             @csrf @method('PATCH')
                             <select name="agent_id" onchange="this.form.submit()"
@@ -119,6 +112,20 @@
                     @endif
                 </div>
 
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase mb-1">Fecha Límite (SLA)</h3>
+                    <p class="text-sm font-semibold text-slate-800">
+                        @if($ticket->due_date)
+                            {{ $ticket->due_date->format('d/m/Y h:i A') }}
+                            @if($ticket->due_date->isPast() && !in_array($ticket->status, ['resolved', 'closed']))
+                                <span class="text-xs text-synapso-danger font-bold ml-1">(Vencido)</span>
+                            @endif
+                        @else
+                            <span class="text-slate-400 italic">Pendiente de asignación</span>
+                        @endif
+                    </p>
+                </div>
+
             </div>
         </div>
     </div>
@@ -127,10 +134,10 @@
     <div class="bg-white border border-slate-200 rounded-xl shadow-sm mb-8 p-6">
         <h3 class="text-sm font-bold text-slate-400 uppercase mb-4">Historial de Estado</h3>
         <div class="space-y-2">
-            @foreach($ticket->statusLogs->sortByDesc('created_at') as $log)
+            @foreach($ticket->statusLogs->sortByDesc('changed_at') as $log)
             <div class="flex items-center gap-3 text-sm">
                 <span class="w-2 h-2 rounded-full bg-synapso-navy flex-shrink-0"></span>
-                <span class="text-slate-500 text-xs">{{ $log->created_at->format('d/m/Y h:i A') }}</span>
+                <span class="text-slate-500 text-xs">{{ $log->changed_at->format('d/m/Y h:i A') }}</span>
                 <span class="text-slate-700">
                     <span class="font-semibold">{{ $log->user->name ?? '—' }}</span>
                     cambió estado a
@@ -142,11 +149,7 @@
     </div>
     @endif
 
-    @php
-        $canViewComments = $isAdmin || $isAgent || $user->id === $ticket->user_id;
-    @endphp
-
-    @if($canViewComments)
+    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'agent' || auth()->id() === $ticket->user_id)
     <div class="space-y-6">
         <h3 class="text-xl font-bold text-slate-800 flex items-center">
             <svg class="w-5 h-5 mr-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">

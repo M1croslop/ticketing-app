@@ -65,8 +65,10 @@ class Ticket extends Model
             ) {
                 $ticket->resolved_at = now();
             }
+        });
 
-            if ($ticket->isDirty('status')) {
+        static::updated(function (Ticket $ticket): void {
+            if ($ticket->wasChanged('status')) {
                 TicketStatusLog::create([
                     'ticket_id'  => $ticket->id,
                     'changed_by' => auth()->id(),
@@ -75,7 +77,6 @@ class Ticket extends Model
                     'changed_at' => now(),
                 ]);
             }
-
         });
     }
 
@@ -96,11 +97,9 @@ class Ticket extends Model
         'description',
         'status',
         'priority',
-        'user_id',
         'agent_id',
         'category_id',
         'due_date',
-        'resolved_at',
     ];
 
     protected $casts = [
@@ -131,5 +130,11 @@ class Ticket extends Model
     public function statusLogs(): HasMany
     {
         return $this->hasMany(TicketStatusLog::class);
+    }
+
+    public function canBeEditedBy(User $user): bool
+    {
+        return $user->role === 'admin'
+            || ($user->role === 'agent' && $this->agent_id === $user->id);
     }
 }

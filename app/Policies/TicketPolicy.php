@@ -13,7 +13,7 @@ class TicketPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true; // Todos los autenticados pueden listar (filtrado en Controller)
     }
 
     /**
@@ -21,7 +21,9 @@ class TicketPolicy
      */
     public function view(User $user, Ticket $ticket): bool
     {
-        return false;
+        return $user->role === 'admin'
+            || $user->role === 'agent'
+            || $user->id === $ticket->user_id;
     }
 
     /**
@@ -29,7 +31,7 @@ class TicketPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return true; // Cualquier autenticado puede abrir un ticket
     }
 
     /**
@@ -37,7 +39,9 @@ class TicketPolicy
      */
     public function update(User $user, Ticket $ticket): bool
     {
-        return false;
+        return $user->role === 'admin'
+            || $user->role === 'agent'
+            || $user->id === $ticket->user_id;
     }
 
     /**
@@ -45,7 +49,7 @@ class TicketPolicy
      */
     public function delete(User $user, Ticket $ticket): bool
     {
-        return false;
+        return $user->role === 'admin' || $user->id === $ticket->user_id;
     }
 
     /**

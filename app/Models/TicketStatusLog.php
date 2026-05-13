@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TicketStatusLog extends Model
 {
-   protected $fillable = [
+    protected $fillable = [
         'ticket_id',
         'changed_by',
         'old_status',
@@ -17,6 +17,10 @@ class TicketStatusLog extends Model
     ];
 
     public $timestamps = false;
+
+    protected $casts = [
+        'changed_at' => 'datetime',
+    ];
 
     public function ticket(): BelongsTo
     {

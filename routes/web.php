@@ -11,7 +11,7 @@ Route::get('/', function () {
 });
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth'])
     ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
@@ -22,9 +22,10 @@ Route::middleware('auth')->group(function () {
 
 Route::resource('tickets', TicketController::class)
     ->middleware('auth');
-require __DIR__ . '/auth.php';
 
 
 Route::resource('tickets.comments', CommentController::class)
     ->only(['store', 'destroy'])
     ->middleware('auth');
+
+require __DIR__ . '/auth.php';

@@ -6,6 +6,7 @@ use App\Models\Comment;
 use App\Models\Ticket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\StoreCommentRequest;
 
 class CommentController extends Controller
 {
@@ -28,19 +29,17 @@ class CommentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, Ticket $ticket)
+    public function store(StoreCommentRequest $request, Ticket $ticket)
     {
-
         $user = Auth::user();
         if ($user->role !== 'admin' && $user->role !== 'agent' && $user->id !== $ticket->user_id) {
             abort(403, 'No tienes permisos para comentar en este ticket.');
         }
-        $request->validate([
-            'body' => 'required|string|min:2'
-        ]);
+
+        $validated = $request->validated();
 
         $ticket->comments()->create([
-            'body' => $request->body,
+            'body' => $validated['body'],
             'user_id' => $user->id,
         ]);
 
@@ -76,6 +75,10 @@ class CommentController extends Controller
      */
     public function destroy(Ticket $ticket, Comment $comment)
     {
+        $user = Auth::user();
+        if ($user->role !== 'admin' && $user->id !== $comment->user_id) {
+            abort(403, 'No tienes permisos para eliminar este comentario.');
+        }
         $comment->delete();
 
         return back()->with('success', 'Comentario eliminado');

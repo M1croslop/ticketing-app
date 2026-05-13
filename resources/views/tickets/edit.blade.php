@@ -30,6 +30,9 @@
                     <input type="text" name="title"
                         value="{{ old('title', $ticket->title) }}"
                         class="w-full border border-slate-300 rounded-lg px-3 py-2">
+                    @error('title')
+                        <p class="text-synapso-danger text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 {{-- DESCRIPCIÓN --}}
@@ -37,6 +40,9 @@
                     <label class="text-sm font-semibold text-slate-700">Descripción</label>
                     <textarea name="description" rows="4"
                         class="w-full border border-slate-300 rounded-lg px-3 py-2">{{ old('description', $ticket->description) }}</textarea>
+                    @error('description')
+                        <p class="text-synapso-danger text-xs mt-1">{{ $message }}</p>
+                    @enderror
                 </div>
 
                 {{-- GRID --}}
@@ -82,7 +88,7 @@
 
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}"
-                                    {{ $ticket->category_id == $category->id ? 'selected' : '' }}>
+                                    @selected(old('category_id', $ticket->category_id) == $category->id)>
                                     {{ $category->name }}
                                 </option>
                             @endforeach

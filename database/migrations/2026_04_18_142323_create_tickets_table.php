@@ -17,8 +17,8 @@ return new class extends Migration
             $table->string('title');
             $table->text('description');
 
-            $table->string('status');
-            $table->string('priority');
+            $table->enum('status', ['open', 'in_progress', 'resolved', 'closed'])->default('open');
+            $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
 
             // Relaciones
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
