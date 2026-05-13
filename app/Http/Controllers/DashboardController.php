@@ -9,48 +9,49 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        //MÉTRICAS
+        $user = auth()->user();
+        
+        // Base query applying role-based visibility
+        $baseQuery = Ticket::query()->when($user->role === 'client', fn($q) => $q->where('user_id', $user->id));
 
-        $openCount = Ticket::where('status', 'open')->count();
+        // MÉTRICAS
+        $openCount = (clone $baseQuery)->where('status', 'open')->count();
 
-        $resolvedToday = Ticket::where('status', 'resolved')
+        $resolvedToday = (clone $baseQuery)->where('status', 'resolved')
             ->whereDate('updated_at', Carbon::today())
             ->count();
 
         // Promedio de resolución en horas
-        $avgResolutionTime = Ticket::whereNotNull('resolved_at')
-            ->get()
-            ->avg(function ($ticket) {
-                return $ticket->created_at->diffInHours($ticket->resolved_at);
-            });
+        $avgResolutionTime = (clone $baseQuery)->whereNotNull('resolved_at')
+            ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) as avg_hours')
+            ->value('avg_hours');
 
-        //KANBAN
-
-        $newTickets = Ticket::with('user')
+        // KANBAN
+        $newTickets = (clone $baseQuery)->with('user')
             ->where('status', 'open')
             ->latest()
             ->take(5)
             ->get();
 
-        $inProgressTickets = Ticket::with('agent')
+        $inProgressTickets = (clone $baseQuery)->with('agent')
             ->where('status', 'in_progress')
             ->latest()
             ->take(5)
             ->get();
 
-        $resolvedTickets = Ticket::with('user')
+        $resolvedTickets = (clone $baseQuery)->with('user')
             ->where('status', 'resolved')
             ->latest()
             ->take(5)
             ->get();
 
-        $closedTickets = Ticket::with('user')
-        ->where('status', 'closed')
-        ->latest()
-        ->take(5)
-        ->get();
-        //RETORNO
+        $closedTickets = (clone $baseQuery)->with('user')
+            ->where('status', 'closed')
+            ->latest()
+            ->take(5)
+            ->get();
 
+        // RETORNO
         return view('dashboard', compact(
             'openCount',
             'resolvedToday',

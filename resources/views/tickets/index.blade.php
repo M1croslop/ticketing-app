@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-7xl mx-auto p-6 bg-synapso-bg">
+    <div class="max-w-7xl mx-auto p-6">
 
         {{-- HEADER --}}
         <div class="flex justify-between items-center mb-6">
@@ -21,12 +21,6 @@
             </a>
         </div>
 
-        {{-- ALERTA --}}
-        @if (session('status'))
-            <div class="mb-4 p-4 border-l-4 border-synapso-success bg-green-50 text-synapso-success">
-                {{ session('status') }}
-            </div>
-        @endif
 
         {{-- FILTROS --}}
         <div class="mb-4 flex gap-3">
@@ -67,6 +61,20 @@
                 </thead>
 
                 <tbody id="tickets-tbody" class="divide-y divide-slate-200">
+                    @php
+                    $priorityClasses = [
+                        'urgent' => 'bg-synapso-priority-urgent-bg text-synapso-priority-urgent-text',
+                        'high'   => 'bg-synapso-priority-high-bg text-synapso-priority-high-text',
+                        'medium' => 'bg-synapso-priority-mid-bg text-synapso-priority-mid-text',
+                        'low'    => 'bg-synapso-priority-low-bg text-synapso-priority-low-text',
+                    ];
+                    $statusClasses = [
+                        'open'        => 'bg-synapso-status-open-bg text-synapso-status-open-text',
+                        'in_progress' => 'bg-synapso-status-progress-bg text-synapso-status-progress-text',
+                        'resolved'    => 'bg-synapso-status-done-bg text-synapso-status-done-text',
+                        'closed'      => 'bg-synapso-status-done-bg text-synapso-status-done-text',
+                    ];
+                    @endphp
 
                     @forelse ($tickets as $ticket)
                                 <tr class="hover:bg-slate-50">
@@ -84,23 +92,34 @@
 
                                     {{-- PRIORIDAD --}}
                                     <td class="px-6 py-4">
-                                        <span class="px-2 py-1 text-xs font-semibold rounded                                                                                                                                                                                                               {{ $ticket->priority == 'high' ? 'bg-synapso-priority-high-bg text-synapso-priority-high-text' :
-                        ($ticket->priority == 'medium' ? 'bg-synapso-priority-mid-bg text-synapso-priority-mid-text' :
-                            'bg-synapso-priority-low-bg text-synapso-priority-low-text') }}">
+                                        <span class="px-2 py-1 text-xs font-semibold rounded {{ $priorityClasses[$ticket->priority] ?? '' }}">
                                             {{ strtoupper($ticket->priority) }}
                                         </span>
                                     </td>
 
                                     {{-- AGENTE --}}
                                     <td class="px-6 py-4 text-sm">
-                                        {{ $ticket->agent->name ?? 'No asignado' }}
+                                        @if(auth()->user()->role === 'admin')
+                                            <form action="{{ route('tickets.update', $ticket) }}" method="POST">
+                                                @csrf @method('PATCH')
+                                                <select name="agent_id" onchange="this.form.submit()" 
+                                                    class="block w-full min-w-[130px] border-slate-200 bg-slate-50 text-slate-700 text-xs font-semibold rounded-lg py-1.5 pl-3 pr-8 hover:bg-slate-100 hover:border-slate-300 focus:border-synapso-navy focus:ring focus:ring-synapso-navy focus:ring-opacity-50 transition-all shadow-sm cursor-pointer">
+                                                    <option value="">No asignado</option>
+                                                    @foreach($agents as $agent)
+                                                        <option value="{{ $agent->id }}" @selected($ticket->agent_id === $agent->id)>
+                                                            {{ $agent->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </form>
+                                        @else
+                                            {{ $ticket->agent->name ?? 'No asignado' }}
+                                        @endif
                                     </td>
 
                                     {{-- ESTADO --}}
                                     <td class="px-6 py-4">
-                                        <span class="px-2 py-1 text-sm font-semibold rounded whitespace-nowrap {{ $ticket->status == 'in_progress' ? 'bg-synapso-status-progress-bg text-synapso-status-progress-text' :
-                        ($ticket->status == 'closed' || $ticket->status == 'done' ? 'bg-synapso-status-done-bg text-synapso-status-done-text' :
-                            'bg-synapso-status-open-bg text-synapso-status-open-text') }}">
+                                        <span class="px-2 py-1 text-sm font-semibold rounded whitespace-nowrap {{ $statusClasses[$ticket->status] ?? '' }}">
                                             {{ ucfirst(str_replace('_', '-', $ticket->status)) }}
                                         </span>
                                     </td>
@@ -120,7 +139,7 @@
                                                                                                                                                                                                                                                                                                                            a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                                 </svg>
                                             </a>
-                                            @if(auth()->id() === $ticket->user_id)
+                                            @can('delete', $ticket)
                                             {{-- EDITAR --}}
                                             <a href="{{ route('tickets.edit', $ticket) }}" title="Editar ticket"
                                                 class="inline-flex items-center justify-center w-9 h-9 rounded-lg border border-transparent
@@ -148,7 +167,7 @@
                                                     </svg>
                                                 </button>
                                             </form>
-                                            @endif
+                                            @endcan
                                         </div>
                                     </td>
                                 </tr>
@@ -204,7 +223,11 @@
 
                     tbody.style.opacity = '1';
                 })
-                .catch(() => { tbody.style.opacity = '1'; });
+                .catch(error => { 
+                    tbody.style.opacity = '1'; 
+                    console.error('Error fetching tickets:', error);
+                    alert('Error al realizar la búsqueda.');
+                });
         }
 
         // Debounce

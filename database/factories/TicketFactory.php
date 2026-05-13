@@ -19,15 +19,17 @@ class TicketFactory extends Factory
      */
     public function definition(): array
     {
-        $user = User::inRandomOrder()->first();
-        $agent = User::inRandomOrder()->first();
+        $user  = User::where('role', 'client')->inRandomOrder()->first()
+            ?? User::factory()->create(['role' => 'client']);
+        $agent = User::whereIn('role', ['agent', 'admin'])->inRandomOrder()->first()
+            ?? User::factory()->create(['role' => 'agent']);
         $category = Category::inRandomOrder()->first();
 
         return [
             'title' => fake()->sentence(),
             'description' => fake()->paragraph(),
-            'status' => fake()->randomElement(['open', 'in_progress', 'closed']),
-            'priority' => fake()->randomElement(['low', 'medium', 'high']),
+            'status' => fake()->randomElement(Ticket::STATUSES),
+            'priority' => fake()->randomElement(Ticket::PRIORITIES),
             'user_id' => $user ? $user->id : User::factory(),
             'agent_id' => $agent ? $agent->id : User::factory(),
             'category_id' => $category ? $category->id : Category::factory(),

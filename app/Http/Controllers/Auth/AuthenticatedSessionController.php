@@ -7,6 +7,7 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -16,7 +17,14 @@ class AuthenticatedSessionController extends Controller
      */
     public function create(): View
     {
-        return view('auth.login');
+        try {
+            DB::connection()->getPdo();
+            $dbOnline = true;
+        } catch (\Exception) {
+            $dbOnline = false;
+        }
+
+        return view('auth.login', compact('dbOnline'));
     }
 
     /**
@@ -28,7 +36,8 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(route('dashboard', absolute: false))
+            ->with('success', '¡Bienvenido de vuelta, ' . $request->user()->name . '!');
     }
 
     /**
@@ -42,6 +51,7 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect('/')
+            ->with('info', 'Sesión cerrada correctamente. ¡Hasta pronto!');
     }
 }

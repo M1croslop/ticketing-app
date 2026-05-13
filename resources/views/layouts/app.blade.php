@@ -8,13 +8,13 @@
     <title>Synapso</title>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
 </head>
 
 <body class="bg-synapso-bg font-sans antialiased">
     @include('components.navbar')
     <main>
-        {{-- <x-alert /> agregar cuando creen el componente de alertas en Sprint 1 --}}
+        <x-alert />
         @yield('content')
     </main>
 </body>

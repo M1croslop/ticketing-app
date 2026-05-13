@@ -1,7 +1,7 @@
 @php
     $user = Auth::user();
     $avatar = strtoupper(substr($user->name, 0, 1));
-    $roleLabels = ['admin' => 'Admin', 'agent' => 'Agente', 'user' => 'Usuario'];
+    $roleLabels = ['admin' => 'Admin', 'agent' => 'Agente', 'client' => 'Cliente'];
     $roleBadgeColors = [
         'admin' => 'bg-synapso-gold text-white',
         'agent' => 'bg-synapso-success text-white',

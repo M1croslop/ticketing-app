@@ -19,14 +19,21 @@ class TicketController extends Controller
      */
     public function index()
     {
-           $tickets = Ticket::with(['user', 'agent', 'category'])
-        ->when(request('status'), fn($q, $status) => $q->where('status', $status))
-        ->when(request('search'), fn($q, $search) => $q->where('title', 'like', "%$search%"))
-        ->latest()
-        ->paginate(10)
-        ->withQueryString();
+        $user = Auth::user();
+        $tickets = Ticket::with(['user', 'agent', 'category'])
+            ->when($user->role === 'client', fn($q) => $q->where('user_id', $user->id))
+            ->when(request('status'), fn($q, $status) => $q->where('status', $status))
+            ->when(request('search'), function ($q, $search) {
+                $safe = str_replace(['%', '_'], ['\%', '\_'], $search);
+                $q->where('title', 'like', "%{$safe}%");
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
-    return view('tickets.index', compact('tickets'));
+        $agents = $user->role === 'admin' ? User::agents()->get() : collect();
+
+        return view('tickets.index', compact('tickets', 'agents'));
     }
 
     /**
@@ -35,7 +42,7 @@ class TicketController extends Controller
     public function create()
     {
         $categories = Category::all();
-        $agents = User::where('role', 'agent')->orWhere('role', 'admin')->get();
+        $agents = User::agents()->get();
         return view('tickets.create', compact('categories', 'agents'));
     }
 
@@ -46,14 +53,13 @@ class TicketController extends Controller
     {
         $validated = $request->validated();
 
-        // Asignamos el ID del usuario autenticado automáticamente
-        $validated['user_id'] = Auth::id();
-        $validated['status'] = 'open';  
-
-        Ticket::create($validated);
+        $ticket = new Ticket($validated);
+        $ticket->user_id = Auth::id();
+        $ticket->status = 'open';
+        $ticket->save();
 
         return redirect()->route('tickets.index')
-            ->with('status', 'Ticket creado con éxito.');
+            ->with('success', 'Ticket creado con éxito.');
     }
 
     /**
@@ -61,8 +67,10 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket)
     {
-        $ticket->load(['user', 'agent', 'category', 'comments.user']);
-        return view('tickets.show', compact('ticket'));
+        $ticket->load(['user', 'agent', 'category', 'comments.user', 'statusLogs.user']);
+        $agents = User::agents()->get();
+        $canEdit = $ticket->canBeEditedBy(Auth::user());
+        return view('tickets.show', compact('ticket', 'agents', 'canEdit'));
     }
 
     /**
@@ -71,7 +79,7 @@ class TicketController extends Controller
     public function edit(Ticket $ticket)
     {
         $categories = Category::all();
-        $agents = User::where('role', 'agent')->orWhere('role', 'admin')->get();
+        $agents = User::agents()->get();
         return view('tickets.edit', compact('ticket', 'categories', 'agents'));
     }
 
@@ -82,14 +90,10 @@ class TicketController extends Controller
     {
         $validated = $request->validated();
 
-        if ($request->status === 'resolved' && !$ticket->resolved_at) {
-            $validated['resolved_at'] = now();
-        }
-
         $ticket->update($validated);
 
         return redirect()->route('tickets.index')
-            ->with('status', 'Ticket actualizado correctamente.');
+        ->with('success', 'Ticket actualizado correctamente.');
     }
 
     /**
@@ -97,9 +101,11 @@ class TicketController extends Controller
      */
     public function destroy(Ticket $ticket)
     {
+        \Illuminate\Support\Facades\Gate::authorize('delete', $ticket);
+
         $ticket->delete();
 
         return redirect()->route('tickets.index')
-            ->with('status', 'Ticket enviado a la papelera.');
+            ->with('warning', 'Ticket enviado a la papelera.');
     }
 }

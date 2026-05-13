@@ -56,6 +56,7 @@
                     </div>
 
                     {{-- AGENTE --}}
+                    @if(auth()->user()->role !== 'client')
                     <div>
                         <label class="text-sm font-semibold text-synapso-navy mb-1 block">
                             Agente
@@ -72,6 +73,7 @@
                             @endforeach
                         </select>
                     </div>
+                    @endif
 
                 </div>
 
@@ -99,6 +101,7 @@
                     </div>
 
                     {{-- FECHA --}}
+                    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'agent')
                     <div>
                         <label class="text-sm font-semibold text-synapso-navy mb-1 block">
                             Fecha límite
@@ -106,6 +109,7 @@
                         <input type="date" name="due_date"
                             class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
                     </div>
+                    @endif
 
                 </div>
 
