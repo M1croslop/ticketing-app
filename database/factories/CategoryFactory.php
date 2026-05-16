@@ -18,8 +18,24 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->word(),
-            'description' => fake()->sentence(),
+            'name' => fake()->randomElement([
+                'Hardware',
+                'Software',
+                'Redes',
+                'Autenticación',
+                'Base de Datos',
+                'UI/UX',
+                'Seguridad'
+            ]),
+            'description' => fake()->randomElement([
+                'Problemas relacionados con equipos físicos',
+                'Errores o fallos del sistema',
+                'Incidentes de red y conectividad',
+                'Problemas de autenticación y acceso',
+                'Consultas relacionadas con bases de datos',
+                'Problemas de interfaz y experiencia de usuario',
+                'Incidentes relacionados con seguridad informática',
+            ]),
         ];
     }
 }
