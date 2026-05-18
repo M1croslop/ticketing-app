@@ -10,10 +10,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 
 class TicketController extends Controller
 {
+    use AuthorizesRequests;
     /**
      * Display a listing of the resource.
      */
@@ -67,9 +69,14 @@ class TicketController extends Controller
      */
     public function show(Ticket $ticket)
     {
+        $this->authorize('view', $ticket);
+
         $ticket->load(['user', 'agent', 'category', 'comments.user', 'statusLogs.user']);
+
         $agents = User::agents()->get();
+
         $canEdit = $ticket->canBeEditedBy(Auth::user());
+
         return view('tickets.show', compact('ticket', 'agents', 'canEdit'));
     }
 
@@ -78,6 +85,7 @@ class TicketController extends Controller
      */
     public function edit(Ticket $ticket)
     {
+        $this->authorize('update', $ticket);
         $categories = Category::all();
         $agents = User::agents()->get();
         return view('tickets.edit', compact('ticket', 'categories', 'agents'));
@@ -88,12 +96,13 @@ class TicketController extends Controller
      */
     public function update(UpdateTicketRequest $request, Ticket $ticket)
     {
+        $this->authorize('update', $ticket);
         $validated = $request->validated();
 
         $ticket->update($validated);
 
         return redirect()->route('tickets.index')
-        ->with('success', 'Ticket actualizado correctamente.');
+            ->with('success', 'Ticket actualizado correctamente.');
     }
 
     /**

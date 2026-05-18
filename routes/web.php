@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\AdminController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -29,3 +30,23 @@ Route::resource('tickets.comments', CommentController::class)
     ->middleware('auth');
 
 require __DIR__ . '/auth.php';
+
+
+Route::middleware(['auth'])->group(function () {
+
+    Route::get('/admin/users', [AdminController::class, 'users'])
+        ->name('admin.users');
+
+    Route::put('/admin/users/{user}/role', [AdminController::class, 'updateRole'])
+        ->name('admin.users.role');
+
+    Route::delete('/admin/users/{user}', [AdminController::class, 'destroyUser'])
+        ->name('admin.users.destroy');
+
+    Route::post('/admin/users/{id}/restore', [AdminController::class, 'restoreUser'])
+        ->name('admin.users.restore');
+
+    Route::get('/admin/stats', [AdminController::class, 'stats'])
+        ->name('admin.stats');
+
+});

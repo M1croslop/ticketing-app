@@ -17,25 +17,49 @@ class CategoryFactory extends Factory
      */
     public function definition(): array
     {
-        return [
-            'name' => fake()->randomElement([
-                'Hardware',
-                'Software',
-                'Redes',
-                'Autenticación',
-                'Base de Datos',
-                'UI/UX',
-                'Seguridad'
-            ]),
-            'description' => fake()->randomElement([
-                'Problemas relacionados con equipos físicos',
-                'Errores o fallos del sistema',
-                'Incidentes de red y conectividad',
-                'Problemas de autenticación y acceso',
-                'Consultas relacionadas con bases de datos',
-                'Problemas de interfaz y experiencia de usuario',
-                'Incidentes relacionados con seguridad informática',
-            ]),
+        $categories = [
+            [
+                'name' => 'Hardware',
+                'description' => 'Problemas relacionados con equipos físicos',
+            ],
+            [
+                'name' => 'Software',
+                'description' => 'Errores o fallos del sistema',
+            ],
+            [
+                'name' => 'Redes',
+                'description' => 'Incidentes de red y conectividad',
+            ],
+            [
+                'name' => 'Autenticación',
+                'description' => 'Problemas de autenticación y acceso',
+            ],
+            [
+                'name' => 'Base de Datos',
+                'description' => 'Consultas relacionadas con bases de datos',
+            ],
+            [
+                'name' => 'UI/UX',
+                'description' => 'Problemas de interfaz y experiencia de usuario',
+            ],
+            [
+                'name' => 'Seguridad',
+                'description' => 'Incidentes relacionados con seguridad informática',
+            ],
+            [
+                'name' => 'Correo Electrónico',
+                'description' => 'Problemas relacionados con correos y notificaciones',
+            ],
+            [
+                'name' => 'Servidores',
+                'description' => 'Incidentes relacionados con servidores y hosting',
+            ],
+            [
+                'name' => 'Soporte Técnico',
+                'description' => 'Solicitudes generales de soporte técnico',
+            ],
         ];
+
+        return fake()->randomElement($categories);
     }
 }

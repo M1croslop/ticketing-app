@@ -24,12 +24,38 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
-        $fullName = fake()->name();
+        $firstName = fake()->randomElement([
+            'Carlos',
+            'Juan',
+            'Pedro',
+            'Ana',
+            'Luis',
+            'Marta',
+            'Miguel',
+            'Valeria',
+            'Fernando',
+            'Daniela'
+        ]);
+
+        $lastName = fake()->randomElement([
+            'Alfaro',
+            'Flamengo',
+            'Iraheta',
+            'Castro',
+            'Marroquin',
+            'Flores',
+            'Castro',
+            'Morales',
+            'Rivas',
+            'Villalobos'
+        ]);
+
+        $fullName = $firstName . ' ' . $lastName;
         $firstName = explode(' ', $fullName)[0];
 
         return [
             'name' => $fullName,
-            'email' => strtolower($firstName) . '@ticketing.com',
+            'email' => strtolower($firstName) . fake()->unique()->numberBetween(1, 999) . '@ticketing.com',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
