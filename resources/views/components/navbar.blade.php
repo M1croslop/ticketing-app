@@ -1,16 +1,19 @@
 @php
     $user = Auth::user();
-    $avatar = strtoupper(substr($user->name, 0, 1));
-    $roleLabels = ['admin' => 'Admin', 'agent' => 'Agente', 'client' => 'Cliente'];
-    $roleBadgeColors = [
-        'admin' => 'bg-synapso-gold text-white',
-        'agent' => 'bg-synapso-success text-white',
-        'user' => 'bg-slate-500 text-white',
-    ];
-    $roleLabel = $roleLabels[$user->role] ?? ucfirst($user->role ?? 'Usuario');
-    $roleBadge = $roleBadgeColors[$user->role] ?? 'bg-slate-500 text-white';
+    if ($user) {
+        $avatar = strtoupper(substr($user->name, 0, 1));
+        $roleLabels = ['admin' => 'Admin', 'agent' => 'Agente', 'client' => 'Cliente'];
+        $roleBadgeColors = [
+            'admin' => 'bg-synapso-gold text-white',
+            'agent' => 'bg-synapso-success text-white',
+            'user' => 'bg-slate-500 text-white',
+        ];
+        $roleLabel = $roleLabels[$user->role] ?? ucfirst($user->role ?? 'Usuario');
+        $roleBadge = $roleBadgeColors[$user->role] ?? 'bg-slate-500 text-white';
+    }
 @endphp
 
+@auth
 <nav x-data="{ mobileOpen: false, userOpen: false }" class="bg-synapso-navy text-white shadow-lg" role="navigation"
     aria-label="Navegación principal">
     <div class="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -254,3 +257,4 @@
     </div>
 
 </nav>
+@endauth
