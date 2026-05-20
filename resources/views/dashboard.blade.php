@@ -15,7 +15,23 @@
                     <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Supervisión Global</h1>
                     <p class="mt-2 text-sm text-slate-500 font-medium">Métricas operacionales de toda la compañía y gestión de tickets.</p>
                 </div>
-                <div>
+                <div class="flex items-center gap-3">
+                    <!-- Segmented Controls / Pill Buttons for Date Range -->
+                    <div class="inline-flex bg-slate-100 p-0.5 rounded-lg border border-slate-200/50 shadow-inner">
+                        @foreach([
+                            'all'   => 'Todos',
+                            'today' => 'Hoy',
+                            'week'  => 'Esta Semana',
+                            'month' => 'Este Mes'
+                        ] as $range => $label)
+                            <a href="{{ route('dashboard', ['date_range' => $range, 'status' => $status]) }}" 
+                               class="px-3 py-1 rounded-md text-xs font-bold transition-all duration-200 {{ $dateRange === $range ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-800' }}">
+                                {{ $label }}
+                            </a>
+                        @endforeach
+                    </div>
+
+                    <!-- Exportar Button -->
                     <button type="button" class="inline-flex items-center gap-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold shadow-sm transition duration-150">
                         <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                         Exportar
@@ -75,7 +91,17 @@
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tickets Resueltos</p>
                         <div class="flex items-baseline mt-2">
                             <span class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ number_format($resolvedThisMonthCount) }}</span>
-                            <span class="text-slate-400 font-medium text-xs ml-2">este mes</span>
+                            <span class="text-slate-400 font-medium text-xs ml-2">
+                                @if($dateRange === 'today')
+                                    hoy
+                                @elseif($dateRange === 'week')
+                                    esta semana
+                                @elseif($dateRange === 'month')
+                                    este mes
+                                @else
+                                    histórico
+                                @endif
+                            </span>
                         </div>
                     </div>
                     <div class="w-full bg-slate-50 h-1.5 rounded-full mt-auto overflow-hidden">
@@ -89,12 +115,45 @@
             <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden mb-8">
                 <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-white">
                     <h2 class="text-base font-bold text-slate-800 tracking-tight">Gestión Total</h2>
-                    <div class="relative inline-block text-left">
-                        <button type="button" class="inline-flex items-center gap-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition">
+                    
+                    @php
+                        $statusLabels = [
+                            'all'         => 'Todos los Estados',
+                            'open'        => 'Abiertos',
+                            'in_progress' => 'En Progreso',
+                            'resolved'    => 'Resueltos',
+                            'closed'      => 'Cerrados'
+                        ];
+                        $currentStatusLabel = $statusLabels[$status] ?? ($statusLabels[request('status')] ?? 'Todos los Estados');
+                    @endphp
+
+                    <div class="relative inline-block text-left" x-data="{ open: false }">
+                        <button type="button" @click="open = !open" 
+                                class="inline-flex items-center gap-2 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition">
                             <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-                            Todos los Estados
-                            <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                            {{ $currentStatusLabel }}
+                            <svg class="w-3 h-3 text-slate-400 transition-transform duration-200" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
                         </button>
+                        
+                        <div x-show="open" 
+                             @click.away="open = false" 
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="absolute right-0 mt-1.5 w-44 rounded-lg bg-white shadow-lg border border-slate-100 ring-1 ring-black ring-opacity-5 focus:outline-none z-30" 
+                             style="display: none;">
+                            <div class="py-1">
+                                @foreach($statusLabels as $statusKey => $label)
+                                    <a href="{{ route('dashboard', ['date_range' => $dateRange, 'status' => $statusKey]) }}" 
+                                       class="block px-4 py-2 text-xs font-semibold {{ ($status === $statusKey || ($statusKey === 'all' && !$status)) ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800' }} transition">
+                                        {{ $label }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
@@ -200,15 +259,34 @@
                 <!-- Footer pagination -->
                 <div class="px-6 py-4 border-t border-slate-100 bg-white flex items-center justify-between">
                     <span class="text-xs font-semibold text-slate-400">
-                        Mostrando 1-{{ $recentTickets->count() }} de {{ $totalTicketsCount }}
+                        @if($recentTickets->total() > 0)
+                            Mostrando {{ $recentTickets->firstItem() }}-{{ $recentTickets->lastItem() }} de {{ $recentTickets->total() }}
+                        @else
+                            No hay tickets para mostrar
+                        @endif
                     </span>
                     <div class="flex items-center gap-1.5">
-                        <button type="button" class="w-6 h-6 border border-slate-200 bg-white hover:bg-slate-50 text-slate-400 flex items-center justify-center rounded transition shadow-sm">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
-                        </button>
-                        <button type="button" class="w-6 h-6 border border-slate-200 bg-white hover:bg-slate-50 text-slate-400 flex items-center justify-center rounded transition shadow-sm">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
-                        </button>
+                        @if($recentTickets->onFirstPage())
+                            <span class="w-6 h-6 border border-slate-100 bg-slate-50 text-slate-300 flex items-center justify-center rounded cursor-not-allowed shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                            </span>
+                        @else
+                            <a href="{{ $recentTickets->previousPageUrl() }}" 
+                               class="w-6 h-6 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center rounded transition shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+                            </a>
+                        @endif
+
+                        @if($recentTickets->hasMorePages())
+                            <a href="{{ $recentTickets->nextPageUrl() }}" 
+                               class="w-6 h-6 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 flex items-center justify-center rounded transition shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            </a>
+                        @else
+                            <span class="w-6 h-6 border border-slate-100 bg-slate-50 text-slate-300 flex items-center justify-center rounded cursor-not-allowed shadow-sm">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+                            </span>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -314,15 +392,85 @@
             <!-- Cabecera de Kanban -->
             <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-bold text-slate-800 tracking-tight">Flujo de Trabajo Activo</h2>
+                
+                @php
+                    $priorityLabels = [
+                        'all'    => 'Prioridad: Todas',
+                        'urgent' => 'Prioridad: Crítica',
+                        'high'   => 'Prioridad: Alta',
+                        'medium' => 'Prioridad: Media',
+                        'low'    => 'Prioridad: Baja',
+                    ];
+                    $currentPriorityLabel = $priorityLabels[$priority] ?? ($priorityLabels[request('priority')] ?? 'Prioridad: Todas');
+
+                    $orderLabels = [
+                        'created_at_desc' => 'Más Nuevos',
+                        'created_at_asc'  => 'Más Antiguos',
+                        'due_date_asc'    => 'Vence Próximamente',
+                    ];
+                    $currentOrderLabel = $orderLabels[$orderBy] ?? ($orderLabels[request('order_by')] ?? 'Ordenar por');
+                @endphp
+
                 <div class="flex items-center gap-2">
-                    <button type="button" class="inline-flex items-center gap-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition">
-                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-                        Filtrar
-                    </button>
-                    <button type="button" class="inline-flex items-center gap-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition">
-                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l-4-4m4 4v12"/></svg>
-                        Ordenar
-                    </button>
+                    <!-- Dropdown: Filtrar por Prioridad -->
+                    <div class="relative inline-block text-left" x-data="{ open: false }">
+                        <button type="button" @click="open = !open" 
+                                class="inline-flex items-center gap-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition">
+                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                            {{ $currentPriorityLabel }}
+                            <svg class="w-3 h-3 text-slate-400 transition-transform duration-200" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        <div x-show="open" 
+                             @click.away="open = false" 
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="absolute right-0 mt-1.5 w-44 rounded-lg bg-white shadow-lg border border-slate-100 ring-1 ring-black ring-opacity-5 focus:outline-none z-30" 
+                             style="display: none;">
+                            <div class="py-1">
+                                @foreach($priorityLabels as $key => $label)
+                                    <a href="{{ route('dashboard', ['priority' => $key, 'order_by' => $orderBy]) }}" 
+                                       class="block px-4 py-2 text-xs font-semibold {{ ($priority === $key || ($key === 'all' && !$priority)) ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800' }} transition">
+                                        {{ str_replace('Prioridad: ', '', $label) }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dropdown: Ordenar -->
+                    <div class="relative inline-block text-left" x-data="{ open: false }">
+                        <button type="button" @click="open = !open" 
+                                class="inline-flex items-center gap-1.5 border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg text-xs font-bold shadow-sm transition">
+                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l-4-4m4 4v12"/></svg>
+                            {{ $currentOrderLabel }}
+                            <svg class="w-3 h-3 text-slate-400 transition-transform duration-200" :class="{'rotate-180': open}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                        </button>
+
+                        <div x-show="open" 
+                             @click.away="open = false" 
+                             x-transition:enter="transition ease-out duration-100"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-75"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="absolute right-0 mt-1.5 w-48 rounded-lg bg-white shadow-lg border border-slate-100 ring-1 ring-black ring-opacity-5 focus:outline-none z-30" 
+                             style="display: none;">
+                            <div class="py-1">
+                                @foreach($orderLabels as $key => $label)
+                                    <a href="{{ route('dashboard', ['priority' => $priority, 'order_by' => $key]) }}" 
+                                       class="block px-4 py-2 text-xs font-semibold {{ $orderBy === $key ? 'bg-indigo-50 text-indigo-600' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-800' }} transition">
+                                        {{ $label }}
+                                    </a>
+                                @endforeach
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

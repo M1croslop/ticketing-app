@@ -10,6 +10,10 @@ class DashboardController extends Controller
     public function index()
     {
         $user = auth()->user();
+        $status = request('status');
+        $dateRange = request('date_range', 'all');
+        $priority = request('priority');
+        $orderBy = request('order_by', 'created_at_desc');
         
         // Base query applying role-based visibility
         // Admin sees all, agent sees only their assigned tickets, client sees only their created tickets
@@ -17,16 +21,28 @@ class DashboardController extends Controller
             ->when($user->role === 'client', fn($q) => $q->where('user_id', $user->id))
             ->when($user->role === 'agent', fn($q) => $q->where('agent_id', $user->id));
 
+        // Create a clone for date-range filtered metrics & lists
+        $filteredQuery = clone $baseQuery;
+
+        if ($dateRange === 'today') {
+            $filteredQuery->whereDate('created_at', Carbon::today());
+        } elseif ($dateRange === 'week') {
+            $filteredQuery->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+        } elseif ($dateRange === 'month') {
+            $filteredQuery->whereMonth('created_at', Carbon::now()->month)
+                          ->whereYear('created_at', Carbon::now()->year);
+        }
+
         // MÉTRICAS INDIVIDUALES POR ESTADO
-        $openCount = (clone $baseQuery)->where('status', 'open')->count();
-        $inProgressCount = (clone $baseQuery)->where('status', 'in_progress')->count();
-        $resolvedCount = (clone $baseQuery)->where('status', 'resolved')->count();
-        $closedCount = (clone $baseQuery)->where('status', 'closed')->count();
+        $openCount = (clone $filteredQuery)->where('status', 'open')->count();
+        $inProgressCount = (clone $filteredQuery)->where('status', 'in_progress')->count();
+        $resolvedCount = (clone $filteredQuery)->where('status', 'resolved')->count();
+        $closedCount = (clone $filteredQuery)->where('status', 'closed')->count();
 
         // MÉTRICAS AGRUPADAS Y TOTALES
         $activeCount = $openCount + $inProgressCount;
         $resolvedTotalCount = $resolvedCount + $closedCount;
-        $totalTicketsCount = (clone $baseQuery)->count();
+        $totalTicketsCount = (clone $filteredQuery)->count();
 
         $resolvedToday = (clone $baseQuery)->whereIn('status', ['resolved', 'closed'])
             ->whereDate('updated_at', Carbon::today())
@@ -39,7 +55,7 @@ class DashboardController extends Controller
         $resolvedTrend = $resolvedToday - $resolvedYesterday;
 
         // Promedio de resolución en horas
-        $avgResolutionTime = (clone $baseQuery)->whereNotNull('resolved_at')
+        $avgResolutionTime = (clone $filteredQuery)->whereNotNull('resolved_at')
             ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) as avg_hours')
             ->value('avg_hours');
 
@@ -75,17 +91,13 @@ class DashboardController extends Controller
             $avgResolutionTrend = round($avgResThisWeek - $avgResLastWeek, 1);
         }
 
-        // 3. Resolved Tickets Count this month (strictly within current month)
-        $resolvedThisMonthCount = (clone $baseQuery)->whereIn('status', ['resolved', 'closed'])
-            ->whereMonth('updated_at', now()->month)
-            ->whereYear('updated_at', now()->year)
+        // 3. Resolved Tickets Count in the active range (replaces strictly this month count)
+        $resolvedThisMonthCount = (clone $filteredQuery)->whereIn('status', ['resolved', 'closed'])
             ->count();
 
         // Average Response Time based on boss's suggested formula (due_date - resolved_at, converted to hours)
-        $avgResponseTimeRaw = (clone $baseQuery)->whereNotNull('resolved_at')
+        $avgResponseTimeRaw = (clone $filteredQuery)->whereNotNull('resolved_at')
             ->whereNotNull('due_date')
-            ->whereMonth('resolved_at', now()->month)
-            ->whereYear('resolved_at', now()->year)
             ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, resolved_at, due_date)) as avg_min')
             ->value('avg_min');
 
@@ -115,14 +127,17 @@ class DashboardController extends Controller
             $avgResponseTrend = round($thisWeekHours - $lastWeekHours, 1);
         }
 
-        // ÚLTIMOS 5 TICKETS (según el rol)
-        $recentTickets = (clone $baseQuery)->with(['user', 'agent', 'category'])
-            ->latest()
-            ->take(5)
-            ->get();
+        // ÚLTIMOS TICKETS CON FILTROS APLICADOS (según el rol, estado y rango de fecha)
+        $ticketsQuery = (clone $filteredQuery)->with(['user', 'agent', 'category']);
+
+        if ($status && $status !== 'all') {
+            $ticketsQuery->where('status', $status);
+        }
+
+        $recentTickets = $ticketsQuery->latest()->paginate(5)->withQueryString();
 
         // SLA Breaches calculation (Overdue open/in-progress tickets relative to now)
-        $slaBreachesCount = (clone $baseQuery)
+        $slaBreachesCount = (clone $filteredQuery)
             ->whereIn('status', ['open', 'in_progress'])
             ->whereNotNull('due_date')
             ->where('due_date', '<', Carbon::now())
@@ -138,18 +153,37 @@ class DashboardController extends Controller
         $slaBreachesTrend = $slaBreachesCount - $slaBreachesYesterdayCount;
 
         // Agent Kanban Workflow collections
-        $agentNewTickets = (clone $baseQuery)->where('status', 'open')
-            ->with(['user', 'category'])
-            ->latest()
-            ->get();
-        $agentInProgressTickets = (clone $baseQuery)->where('status', 'in_progress')
-            ->with(['user', 'category'])
-            ->latest()
-            ->get();
-        $agentResolvedTickets = (clone $baseQuery)->whereIn('status', ['resolved', 'closed'])
-            ->with(['user', 'category'])
-            ->latest()
-            ->get();
+        $newTicketsQuery = (clone $filteredQuery)->where('status', 'open');
+        $inProgressTicketsQuery = (clone $filteredQuery)->where('status', 'in_progress');
+        $resolvedTicketsQuery = (clone $filteredQuery)->whereIn('status', ['resolved', 'closed']);
+
+        // Apply priority filter
+        if ($priority && $priority !== 'all') {
+            $newTicketsQuery->where('priority', $priority);
+            $inProgressTicketsQuery->where('priority', $priority);
+            $resolvedTicketsQuery->where('priority', $priority);
+        }
+
+        // Apply sorting / ordering
+        if ($orderBy === 'created_at_asc') {
+            $newTicketsQuery->oldest();
+            $inProgressTicketsQuery->oldest();
+            $resolvedTicketsQuery->oldest();
+        } elseif ($orderBy === 'due_date_asc') {
+            // Put tickets with null due_date at the end
+            $newTicketsQuery->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END, due_date ASC');
+            $inProgressTicketsQuery->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END, due_date ASC');
+            $resolvedTicketsQuery->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END, due_date ASC');
+        } else {
+            // Default: newest first
+            $newTicketsQuery->latest();
+            $inProgressTicketsQuery->latest();
+            $resolvedTicketsQuery->latest();
+        }
+
+        $agentNewTickets = $newTicketsQuery->with(['user', 'category'])->get();
+        $agentInProgressTickets = $inProgressTicketsQuery->with(['user', 'category'])->get();
+        $agentResolvedTickets = $resolvedTicketsQuery->with(['user', 'category'])->get();
 
         // RETORNO
         return view('dashboard', compact(
@@ -176,7 +210,11 @@ class DashboardController extends Controller
             'slaBreachesTrend',
             'agentNewTickets',
             'agentInProgressTickets',
-            'agentResolvedTickets'
+            'agentResolvedTickets',
+            'dateRange',
+            'status',
+            'priority',
+            'orderBy'
         ));
     }
 }
