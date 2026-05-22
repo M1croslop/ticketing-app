@@ -62,6 +62,21 @@
                         @endif
                     </a>
 
+                    @if(auth()->user()->role === 'admin')
+                    <a href="{{ route('admin.users') }}"
+                        class="{{ request()->routeIs('admin.*') ? 'bg-white/10 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}
+                              px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150 flex items-center gap-1.5"
+                        aria-label="Gestión de usuarios">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Usuarios
+                        @if(request()->routeIs('admin.*'))
+                            <span class="sr-only">(página actual)</span>
+                        @endif
+                    </a>
+
                     <a href="#"
                         class="text-slate-300 hover:text-white hover:bg-white/5
                               px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150 flex items-center gap-1.5">
@@ -71,6 +86,7 @@
                         </svg>
                         Reportes
                     </a>
+                    @endif
 
                 </div>
             </div>
@@ -231,6 +247,17 @@
                 Tickets
             </a>
 
+            @if(auth()->user()->role === 'admin')
+            <a href="{{ route('admin.users') }}"
+                class="{{ request()->routeIs('admin.*') ? 'bg-white/10 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}
+                      flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Usuarios
+            </a>
+
             <a href="#"
                 class="text-slate-300 hover:text-white hover:bg-white/5
                       flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150">
@@ -240,7 +267,7 @@
                 </svg>
                 Reportes
             </a>
-
+            @endif
         </div>
 
         {{-- Mobile: Nuevo Ticket + separador --}}

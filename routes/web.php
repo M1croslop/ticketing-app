@@ -32,21 +32,27 @@ Route::resource('tickets.comments', CommentController::class)
 require __DIR__ . '/auth.php';
 
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
 
-    Route::get('/admin/users', [AdminController::class, 'users'])
-        ->name('admin.users');
+    Route::get('/users', [AdminController::class, 'users'])
+        ->name('users');
 
-    Route::put('/admin/users/{user}/role', [AdminController::class, 'updateRole'])
-        ->name('admin.users.role');
+    Route::get('/users/create', [AdminController::class, 'createUser'])
+        ->name('users.create');
 
-    Route::delete('/admin/users/{user}', [AdminController::class, 'destroyUser'])
-        ->name('admin.users.destroy');
+    Route::post('/users', [AdminController::class, 'storeUser'])
+        ->name('users.store');
 
-    Route::post('/admin/users/{id}/restore', [AdminController::class, 'restoreUser'])
-        ->name('admin.users.restore');
+    Route::patch('/users/{user}/role', [AdminController::class, 'updateRole'])
+        ->name('users.updateRole');
 
-    Route::get('/admin/stats', [AdminController::class, 'stats'])
-        ->name('admin.stats');
+    Route::delete('/users/{user}', [AdminController::class, 'destroyUser'])
+        ->name('users.destroy');
+
+    Route::patch('/users/{user}/restore', [AdminController::class, 'restoreUser'])
+        ->name('users.restore');
+
+    Route::get('/stats', [AdminController::class, 'stats'])
+        ->name('stats');
 
 });
