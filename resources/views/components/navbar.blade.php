@@ -6,7 +6,7 @@
         $roleBadgeColors = [
             'admin' => 'bg-synapso-gold text-white',
             'agent' => 'bg-synapso-success text-white',
-            'client' => 'bg-slate-500 text-white',
+            'user' => 'bg-slate-500 text-white',
         ];
         $roleLabel = $roleLabels[$user->role] ?? ucfirst($user->role ?? 'Usuario');
         $roleBadge = $roleBadgeColors[$user->role] ?? 'bg-slate-500 text-white';
@@ -36,7 +36,6 @@
                 {{-- Nav Links — Desktop --}}
                 <div class="hidden md:flex items-center gap-1">
 
-                    {{-- Dashboard — todos los roles --}}
                     <a href="{{ route('dashboard') }}"
                         class="{{ request()->routeIs('dashboard') ? 'bg-white/10 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}
                               px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150 flex items-center gap-1.5">
@@ -50,62 +49,43 @@
                         @endif
                     </a>
 
-                    {{-- Tickets — admin y agente: todos los tickets | cliente: sus tickets --}}
-                    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'agent')
-                        <a href="{{ route('tickets.index') }}"
-                            class="{{ request()->routeIs('tickets.*') ? 'bg-white/10 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}
-                                  px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150 flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                            Tickets
-                            @if(request()->routeIs('tickets.*'))
-                                <span class="sr-only">(página actual)</span>
-                            @endif
-                        </a>
-                    @elseif(auth()->user()->role === 'client')
-                        <a href="{{ route('tickets.index') }}"
-                            class="{{ request()->routeIs('tickets.*') ? 'bg-white/10 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}
-                                  px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150 flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                            Mis Tickets
-                            @if(request()->routeIs('tickets.*'))
-                                <span class="sr-only">(página actual)</span>
-                            @endif
-                        </a>
-                    @endif
+                    <a href="{{ route('tickets.index') }}"
+                        class="{{ request()->routeIs('tickets.*') ? 'bg-white/10 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}
+                              px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150 flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                        Tickets
+                        @if(request()->routeIs('tickets.*'))
+                            <span class="sr-only">(página actual)</span>
+                        @endif
+                    </a>
 
-                    {{-- Reportes — admin y agente --}}
-                    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'agent')
-                        <a href="#"
-                            class="text-slate-300 hover:text-white hover:bg-white/5
-                                  px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150 flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                            </svg>
-                            Reportes
-                        </a>
-                    @endif
-
-                    {{-- Usuarios — sólo admin --}}
                     @if(auth()->user()->role === 'admin')
-                        <a href="{{ route('admin.users') }}"
-                            class="{{ request()->routeIs('admin.users*') ? 'bg-white/10 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}
-                                  px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150 flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                            </svg>
-                            Usuarios
-                            @if(request()->routeIs('admin.users*'))
-                                <span class="sr-only">(página actual)</span>
-                            @endif
-                        </a>
+                    <a href="{{ route('admin.users') }}"
+                        class="{{ request()->routeIs('admin.*') ? 'bg-white/10 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}
+                              px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150 flex items-center gap-1.5"
+                        aria-label="Gestión de usuarios">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Usuarios
+                        @if(request()->routeIs('admin.*'))
+                            <span class="sr-only">(página actual)</span>
+                        @endif
+                    </a>
+
+                    <a href="#"
+                        class="text-slate-300 hover:text-white hover:bg-white/5
+                              px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-150 flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                        Reportes
+                    </a>
                     @endif
 
                 </div>
@@ -114,17 +94,15 @@
             {{-- ── LADO DERECHO: Nuevo Ticket + Usuario ── --}}
             <div class="flex items-center gap-3">
 
-                {{-- Botón Nuevo Ticket — admin y agente --}}
-                @if(auth()->user()->role === 'admin' || auth()->user()->role === 'agent')
-                    <a href="{{ route('tickets.create') }}" class="hidden sm:flex items-center gap-2 bg-synapso-gold hover:bg-synapso-amber
-                              text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md
-                              transition-all duration-200 hover:shadow-lg hover:-translate-y-px active:translate-y-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-                        </svg>
-                        Nuevo Ticket
-                    </a>
-                @endif
+                {{-- Botón Nuevo Ticket --}}
+                <a href="{{ route('tickets.create') }}" class="hidden sm:flex items-center gap-2 bg-synapso-gold hover:bg-synapso-amber
+                          text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md
+                          transition-all duration-200 hover:shadow-lg hover:-translate-y-px active:translate-y-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Nuevo Ticket
+                </a>
 
                 {{-- Divider --}}
                 <div class="hidden sm:block w-px h-6 bg-white/20" aria-hidden="true"></div>
@@ -197,20 +175,6 @@
                                 </svg>
                                 Mi Perfil
                             </a>
-
-                            {{-- Gestión de usuarios — acceso directo sólo para admin --}}
-                            @if(auth()->user()->role === 'admin')
-                                <a href="{{ route('admin.users') }}"
-                                   class="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700
-                                          hover:bg-slate-50 hover:text-synapso-navy transition-colors duration-100"
-                                   role="menuitem">
-                                    <svg class="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
-                                    </svg>
-                                    Gestión de Usuarios
-                                </a>
-                            @endif
                         </div>
 
                         {{-- Separator --}}
@@ -263,7 +227,6 @@
         class="md:hidden border-t border-white/10 bg-synapso-navy" style="display: none;">
         <div class="px-4 py-3 space-y-1">
 
-            {{-- Dashboard — todos --}}
             <a href="{{ route('dashboard') }}"
                 class="{{ request()->routeIs('dashboard') ? 'bg-white/10 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}
                       flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150">
@@ -274,7 +237,6 @@
                 Dashboard
             </a>
 
-            {{-- Tickets --}}
             <a href="{{ route('tickets.index') }}"
                 class="{{ request()->routeIs('tickets.*') ? 'bg-white/10 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}
                       flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150">
@@ -282,49 +244,42 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                 </svg>
-                {{ auth()->user()->role === 'client' ? 'Mis Tickets' : 'Tickets' }}
+                Tickets
             </a>
 
-            {{-- Reportes — admin y agente --}}
-            @if(auth()->user()->role === 'admin' || auth()->user()->role === 'agent')
-                <a href="#"
-                    class="text-slate-300 hover:text-white hover:bg-white/5
-                          flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
-                    Reportes
-                </a>
-            @endif
-
-            {{-- Usuarios — admin --}}
             @if(auth()->user()->role === 'admin')
-                <a href="{{ route('admin.users') }}"
-                    class="{{ request()->routeIs('admin.users*') ? 'bg-white/10 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}
-                          flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    Usuarios
-                </a>
-            @endif
+            <a href="{{ route('admin.users') }}"
+                class="{{ request()->routeIs('admin.*') ? 'bg-white/10 text-white font-semibold' : 'text-slate-300 hover:text-white hover:bg-white/5' }}
+                      flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Usuarios
+            </a>
 
+            <a href="#"
+                class="text-slate-300 hover:text-white hover:bg-white/5
+                      flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors duration-150">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Reportes
+            </a>
+            @endif
         </div>
 
-        {{-- Mobile CTA — admin y agente --}}
-        @if(auth()->user()->role === 'admin' || auth()->user()->role === 'agent')
-            <div class="px-4 pb-4 pt-1 border-t border-white/10 mt-1">
-                <a href="{{ route('tickets.create') }}" class="flex items-center justify-center gap-2 w-full bg-synapso-gold hover:bg-amber-600
-                          text-white px-4 py-2.5 rounded-lg text-sm font-semibold shadow transition-colors duration-150">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Nuevo Ticket
-                </a>
-            </div>
-        @endif
+        {{-- Mobile: Nuevo Ticket + separador --}}
+        <div class="px-4 pb-4 pt-1 border-t border-white/10 mt-1">
+            <a href="{{ route('tickets.create') }}" class="flex items-center justify-center gap-2 w-full bg-synapso-gold hover:bg-amber-600
+                      text-white px-4 py-2.5 rounded-lg text-sm font-semibold shadow transition-colors duration-150">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                </svg>
+                Nuevo Ticket
+            </a>
+        </div>
 
     </div>
 
