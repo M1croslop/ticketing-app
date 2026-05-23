@@ -55,4 +55,6 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/stats', [AdminController::class, 'stats'])
         ->name('stats');
 
+     Route::post('/stats/export', [AdminController::class, 'export'])
+        ->name('stats.export');    
 });

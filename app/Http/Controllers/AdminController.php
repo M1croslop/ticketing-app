@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Ticket;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
+
 
 class AdminController extends Controller
 {
@@ -114,12 +117,163 @@ class AdminController extends Controller
 
     public function stats()
     {
-        return view('admin.stats', [
-            'users' => User::count(),
-            'tickets' => Ticket::count(),
-            'admins' => User::where('role', 'admin')->count(),
-            'agents' => User::where('role', 'agent')->count(),
-            'clients' => User::where('role', 'client')->count(),
-        ]);
+        // ── 1. Total de tickets por categoría ───────────────────────────────
+        $ticketsByCategory = Category::withCount([
+            'tickets',
+            'tickets as open_count'        => fn($q) => $q->where('status', 'open'),
+            'tickets as in_progress_count' => fn($q) => $q->where('status', 'in_progress'),
+            'tickets as resolved_count'    => fn($q) => $q->whereIn('status', ['resolved', 'closed']),
+        ])
+        ->orderByDesc('tickets_count')
+        ->get();
+ 
+        $maxCategoryCount = $ticketsByCategory->max('tickets_count') ?: 1;
+ 
+        // ── 2. Tiempo promedio de resolución (horas) ────────────────────────
+        $avgResolutionTime = Ticket::whereNotNull('resolved_at')
+            ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) as avg_hours')
+            ->value('avg_hours');
+ 
+        $avgResolutionTime = $avgResolutionTime ? round($avgResolutionTime, 1) : null;
+ 
+        // ── 3. Tickets vencidos: now() > due_date y status != resolved ───────
+        $overdueTickets = Ticket::with(['user', 'agent', 'category'])
+            ->whereNotIn('status', ['resolved', 'closed'])
+            ->whereNotNull('due_date')
+            ->where('due_date', '<', now())
+            ->orderBy('due_date')
+            ->get();
+ 
+        // ── Totales de tickets ──────────────────────────────────────────────
+        $totalTickets    = Ticket::count();
+        $openCount       = Ticket::where('status', 'open')->count();
+        $inProgressCount = Ticket::where('status', 'in_progress')->count();
+        $resolvedCount   = Ticket::whereIn('status', ['resolved', 'closed'])->count();
+ 
+        // ── Cumplimiento SLA ────────────────────────────────────────────────
+        $resolvedOnTime = Ticket::whereNotNull('resolved_at')
+            ->whereNotNull('due_date')
+            ->whereColumn('resolved_at', '<=', 'due_date')
+            ->count();
+ 
+        $slaComplianceRate = $resolvedCount > 0
+            ? round(($resolvedOnTime / $resolvedCount) * 100, 1)
+            : 0;
+ 
+        // ── Tabla CRUD de usuarios (sin contraseñas ni datos sensibles) ──────
+        $allUsers = User::withTrashed()
+            ->withCount(['tickets', 'assignedTickets'])
+            ->orderBy('role')
+            ->orderBy('name')
+            ->get();
+ 
+        // ── Conteos de usuarios (compatibilidad con la vista original) ───────
+        $users   = User::count();
+        $admins  = User::where('role', 'admin')->count();
+        $agents  = User::where('role', 'agent')->count();
+        $clients = User::where('role', 'client')->count();
+ 
+        return view('admin.stats', compact(
+            // los tres requeridos
+            'ticketsByCategory',
+            'avgResolutionTime',
+            'overdueTickets',
+            // KPIs de tickets
+            'maxCategoryCount',
+            'totalTickets',
+            'openCount',
+            'inProgressCount',
+            'resolvedCount',
+            'slaComplianceRate',
+            // tabla de usuarios
+            'allUsers',
+            // conteos de usuarios (compatibilidad)
+            'users',
+            'admins',
+            'agents',
+            'clients'
+        ));
     }
+
+    public function export(Request $request)
+        {
+            $sections = $request->input('sections', []);
+    
+            // Siempre incluimos la cabecera; el resto es opcional
+            $data = [
+                'sections'      => $sections,
+                'generatedAt'   => now()->format('d/m/Y H:i'),
+                'generatedBy'   => auth()->user()->name,
+            ];
+    
+            if (in_array('kpis', $sections)) {
+                $data['totalTickets']    = Ticket::count();
+                $data['openCount']       = Ticket::where('status', 'open')->count();
+                $data['inProgressCount'] = Ticket::where('status', 'in_progress')->count();
+                $data['resolvedCount']   = Ticket::whereIn('status', ['resolved', 'closed'])->count();
+    
+                $resolvedOnTime = Ticket::whereNotNull('resolved_at')
+                    ->whereNotNull('due_date')
+                    ->whereColumn('resolved_at', '<=', 'due_date')
+                    ->count();
+    
+                $data['slaComplianceRate'] = $data['resolvedCount'] > 0
+                    ? round(($resolvedOnTime / $data['resolvedCount']) * 100, 1)
+                    : 0;
+    
+                $data['avgResolutionTime'] = Ticket::whereNotNull('resolved_at')
+                    ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) as avg_hours')
+                    ->value('avg_hours');
+    
+                $data['avgResolutionTime'] = $data['avgResolutionTime']
+                    ? round($data['avgResolutionTime'], 1)
+                    : null;
+            }
+    
+            if (in_array('categories', $sections)) {
+                $data['ticketsByCategory'] = Category::withCount([
+                    'tickets',
+                    'tickets as open_count'        => fn($q) => $q->where('status', 'open'),
+                    'tickets as in_progress_count' => fn($q) => $q->where('status', 'in_progress'),
+                    'tickets as resolved_count'    => fn($q) => $q->whereIn('status', ['resolved', 'closed']),
+                ])
+                ->orderByDesc('tickets_count')
+                ->get();
+            }
+    
+            if (in_array('overdue', $sections)) {
+                $data['overdueTickets'] = Ticket::with(['user', 'agent', 'category'])
+                    ->whereNotIn('status', ['resolved', 'closed'])
+                    ->whereNotNull('due_date')
+                    ->where('due_date', '<', now())
+                    ->orderBy('due_date')
+                    ->get();
+            }
+    
+            if (in_array('agents', $sections)) {
+                $data['topAgents'] = User::where('role', 'agent')
+                    ->withCount([
+                        'assignedTickets as resolved_count' => fn($q) =>
+                            $q->whereIn('status', ['resolved', 'closed']),
+                        'assignedTickets as active_count' => fn($q) =>
+                            $q->whereIn('status', ['open', 'in_progress']),
+                    ])
+                    ->orderByDesc('resolved_count')
+                    ->get();
+            }
+    
+            if (in_array('users', $sections)) {
+                $data['allUsers'] = User::withTrashed()
+                    ->withCount(['tickets', 'assignedTickets'])
+                    ->orderBy('role')
+                    ->orderBy('name')
+                    ->get();
+            }
+    
+            return response()
+                ->view('admin.stats-export', $data)
+                ->header('Content-Type', 'text/html; charset=UTF-8');
+        }
+
+
 }
