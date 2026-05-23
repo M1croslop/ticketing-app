@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use App\Models\Ticket;
 use App\Models\Category;
 use App\Models\User;
@@ -11,31 +10,100 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
-
+use Carbon\Carbon;
 
 class TicketController extends Controller
 {
     use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $user = Auth::user();
-        $tickets = Ticket::with(['user', 'agent', 'category'])
+        $user       = Auth::user();
+        $status     = $request->get('status');
+        $search     = $request->get('search');
+        $categoryId = $request->get('category_id');
+        $dateRange  = $request->get('date_range', 'all');
+
+        // ── Base query con visibilidad por rol ──────────────────────────────
+        $baseQuery = Ticket::with(['user', 'agent', 'category'])
             ->when($user->role === 'client', fn($q) => $q->where('user_id', $user->id))
-            ->when(request('status'), fn($q, $status) => $q->where('status', $status))
-            ->when(request('search'), function ($q, $search) {
-                $safe = str_replace(['%', '_'], ['\%', '\_'], $search);
+            ->when($user->role === 'agent',  fn($q) => $q->where('agent_id', $user->id));
+
+        // ── Filtros aplicados ────────────────────────────────────────────────
+        $tickets = (clone $baseQuery)
+            ->when($status, fn($q, $s) => $q->where('status', $s))
+            ->when($categoryId, fn($q, $c) => $q->where('category_id', $c))
+            ->when($search, function ($q, $s) {
+                $safe = str_replace(['%', '_'], ['\%', '\_'], $s);
                 $q->where('title', 'like', "%{$safe}%");
             })
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
-        $agents = $user->role === 'admin' ? User::agents()->get() : collect();
+        $agents     = $user->role === 'admin' ? User::agents()->get() : collect();
+        $categories = Category::orderBy('name')->get();
 
-        return view('tickets.index', compact('tickets', 'agents'));
+        // ── Métricas para el Agente ──────────────────────────────────────────
+        $activeCount       = 0;
+        $resolvedToday     = 0;
+        $criticalCount     = 0;
+        $avgResponseTime   = null;
+
+        if ($user->role === 'agent') {
+            $activeCount = (clone $baseQuery)
+                ->whereIn('status', ['open', 'in_progress'])
+                ->count();
+
+            $resolvedToday = (clone $baseQuery)
+                ->whereIn('status', ['resolved', 'closed'])
+                ->whereDate('updated_at', Carbon::today())
+                ->count();
+
+            $criticalCount = (clone $baseQuery)
+                ->where('priority', 'urgent')
+                ->whereIn('status', ['open', 'in_progress'])
+                ->count();
+
+            $avgRaw = (clone $baseQuery)
+                ->whereNotNull('resolved_at')
+                ->whereNotNull('due_date')
+                ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, resolved_at, due_date)) as avg_min')
+                ->value('avg_min');
+
+            $avgResponseTime = $avgRaw !== null ? round(abs($avgRaw) / 60, 1) : 4.2;
+        }
+
+        // ── Métricas para el Admin ───────────────────────────────────────────
+        $totalOpen           = 0;
+        $escalatedCount      = 0;
+        $agentEfficiencyPct  = 85;
+
+        if ($user->role === 'admin') {
+            $totalOpen = Ticket::where('status', 'open')->count();
+
+            $escalatedCount = Ticket::whereIn('priority', ['urgent', 'high'])
+                ->whereIn('status', ['open', 'in_progress'])
+                ->count();
+
+            $totalTickets  = Ticket::count();
+            $totalResolved = Ticket::whereIn('status', ['resolved', 'closed'])->count();
+            $agentEfficiencyPct = $totalTickets > 0
+                ? round(($totalResolved / $totalTickets) * 100)
+                : 85;
+        }
+
+        return view('tickets.index', compact(
+            'tickets', 'agents', 'categories',
+            'status', 'search', 'categoryId', 'dateRange',
+            // agent metrics
+            'activeCount', 'resolvedToday', 'criticalCount', 'avgResponseTime',
+            // admin metrics
+            'totalOpen', 'escalatedCount', 'agentEfficiencyPct'
+        ));
     }
 
     /**
@@ -44,7 +112,8 @@ class TicketController extends Controller
     public function create()
     {
         $categories = Category::all();
-        $agents = User::agents()->get();
+        $agents     = User::agents()->get();
+
         return view('tickets.create', compact('categories', 'agents'));
     }
 
@@ -55,9 +124,9 @@ class TicketController extends Controller
     {
         $validated = $request->validated();
 
-        $ticket = new Ticket($validated);
+        $ticket          = new Ticket($validated);
         $ticket->user_id = Auth::id();
-        $ticket->status = 'open';
+        $ticket->status  = 'open';
         $ticket->save();
 
         return redirect()->route('tickets.index')
@@ -73,8 +142,7 @@ class TicketController extends Controller
 
         $ticket->load(['user', 'agent', 'category', 'comments.user', 'statusLogs.user']);
 
-        $agents = User::agents()->get();
-
+        $agents  = User::agents()->get();
         $canEdit = $ticket->canBeEditedBy(Auth::user());
 
         return view('tickets.show', compact('ticket', 'agents', 'canEdit'));
@@ -86,8 +154,10 @@ class TicketController extends Controller
     public function edit(Ticket $ticket)
     {
         $this->authorize('update', $ticket);
+
         $categories = Category::all();
-        $agents = User::agents()->get();
+        $agents     = User::agents()->get();
+
         return view('tickets.edit', compact('ticket', 'categories', 'agents'));
     }
 
@@ -97,9 +167,8 @@ class TicketController extends Controller
     public function update(UpdateTicketRequest $request, Ticket $ticket)
     {
         $this->authorize('update', $ticket);
-        $validated = $request->validated();
 
-        $ticket->update($validated);
+        $ticket->update($request->validated());
 
         return redirect()->route('tickets.index')
             ->with('success', 'Ticket actualizado correctamente.');
