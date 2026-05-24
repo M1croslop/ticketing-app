@@ -7,6 +7,7 @@ use App\Models\Category;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Http\Requests\StoreTicketRequest;
 use App\Http\Requests\UpdateTicketRequest;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -44,7 +45,7 @@ class TicketController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        $agents     = $user->role === 'admin' ? User::agents()->get() : collect();
+        $agents     = $user->role === 'admin' ? User::agents()->orderBy('name')->get() : collect();
         $categories = Category::orderBy('name')->get();
 
         // ── Métricas para el Agente ──────────────────────────────────────────
@@ -111,8 +112,8 @@ class TicketController extends Controller
      */
     public function create()
     {
-        $categories = Category::all();
-        $agents     = User::agents()->get();
+        $categories = Category::orderBy('name')->get();
+        $agents     = User::agents()->orderBy('name')->get();
 
         return view('tickets.create', compact('categories', 'agents'));
     }
@@ -142,10 +143,11 @@ class TicketController extends Controller
 
         $ticket->load(['user', 'agent', 'category', 'comments.user', 'statusLogs.user']);
 
-        $agents  = User::agents()->get();
-        $canEdit = $ticket->canBeEditedBy(Auth::user());
+        $agents     = User::agents()->orderBy('name')->get();
+        $categories = \App\Models\Category::orderBy('name')->get();
+        $canEdit    = $ticket->canBeEditedBy(Auth::user());
 
-        return view('tickets.show', compact('ticket', 'agents', 'canEdit'));
+        return view('tickets.show', compact('ticket', 'agents', 'categories', 'canEdit'));
     }
 
     /**
@@ -155,8 +157,8 @@ class TicketController extends Controller
     {
         $this->authorize('update', $ticket);
 
-        $categories = Category::all();
-        $agents     = User::agents()->get();
+        $categories = Category::orderBy('name')->get();
+        $agents     = User::agents()->orderBy('name')->get();
 
         return view('tickets.edit', compact('ticket', 'categories', 'agents'));
     }
@@ -170,8 +172,40 @@ class TicketController extends Controller
 
         $ticket->update($request->validated());
 
+        // Redirect back to show page when the request comes from the detail view
+        if ($request->boolean('_redirect_back')) {
+            return redirect()->route('tickets.show', $ticket)
+                ->with('success', 'Ticket actualizado correctamente.');
+        }
+
         return redirect()->route('tickets.index')
             ->with('success', 'Ticket actualizado correctamente.');
+    }
+
+    /**
+     * Agent self-assigns to an unassigned ticket ("Take Ticket").
+     */
+    public function take(Ticket $ticket)
+    {
+        $this->authorize('take', $ticket);
+
+        $updated = \Illuminate\Support\Facades\DB::transaction(function () use ($ticket) {
+            $t = Ticket::where('id', $ticket->id)->lockForUpdate()->first();
+            if ($t && is_null($t->agent_id)) {
+                $t->agent_id = Auth::id();
+                $t->save(); // Fires Eloquent events (SLA calculation, logs)
+                return true;
+            }
+            return false;
+        });
+
+        if (! $updated) {
+            return redirect()->route('tickets.show', $ticket)
+                ->with('warning', 'Este ticket ya fue tomado por otro agente.');
+        }
+
+        return redirect()->route('tickets.show', $ticket)
+            ->with('success', 'Ticket tomado correctamente. El SLA ha sido calculado.');
     }
 
     /**

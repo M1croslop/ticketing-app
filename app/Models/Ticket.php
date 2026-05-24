@@ -71,7 +71,7 @@ class Ticket extends Model
             if ($ticket->wasChanged('status')) {
                 TicketStatusLog::create([
                     'ticket_id'  => $ticket->id,
-                    'changed_by' => auth()->id(),
+                    'changed_by' => auth()->id() ?? $ticket->agent_id ?? $ticket->user_id,
                     'old_status' => $ticket->getOriginal('status'),
                     'new_status' => $ticket->status,
                     'changed_at' => now(),
@@ -136,5 +136,25 @@ class Ticket extends Model
     {
         return $user->role === 'admin'
             || ($user->role === 'agent' && $this->agent_id === $user->id);
+    }
+
+    /**
+     * Calcula el porcentaje de tickets resueltos dentro del SLA (resolved_at <= due_date).
+     * Centraliza esta lógica para evitar duplicación en AdminController y DashboardController.
+     */
+    public static function slaComplianceRate(): float
+    {
+        $resolved = self::whereIn('status', ['resolved', 'closed'])->count();
+
+        if ($resolved === 0) {
+            return 0.0;
+        }
+
+        $onTime = self::whereNotNull('resolved_at')
+            ->whereNotNull('due_date')
+            ->whereColumn('resolved_at', '<=', 'due_date')
+            ->count();
+
+        return round(($onTime / $resolved) * 100, 1);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use App\Models\Ticket;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,7 +30,10 @@ class StoreTicketRequest extends FormRequest
             'description' => 'required|string|min:10',
             'priority'    => ['required', 'in:' . implode(',', Ticket::PRIORITIES)],
             'category_id' => 'required|exists:categories,id',
-            'agent_id'    => 'nullable|exists:users,id',
+            'agent_id'    => [
+                'nullable',
+                Rule::exists('users', 'id')->whereIn('role', ['agent', 'admin']),
+            ],
         ];
     }
 }

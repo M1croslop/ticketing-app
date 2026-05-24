@@ -24,14 +24,25 @@ class UpdateTicketRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'title'       => 'sometimes|required|string|min:5|max:150',
             'description' => 'sometimes|required|string|min:10',
-            'status'      => ['sometimes', 'required', 'in:' . implode(',', Ticket::STATUSES)],
-            'priority'    => ['sometimes', 'required', 'in:' . implode(',', Ticket::PRIORITIES)],
             'category_id' => 'sometimes|required|exists:categories,id',
-            'agent_id'    => 'sometimes|nullable|exists:users,id',
-            'due_date'    => 'sometimes|nullable|date',
         ];
+
+        $user = auth()->user();
+
+        if ($user->role === 'admin') {
+            $rules['status']   = ['sometimes', 'required', 'in:' . implode(',', Ticket::STATUSES)];
+            $rules['priority'] = ['sometimes', 'required', 'in:' . implode(',', Ticket::PRIORITIES)];
+            $rules['agent_id'] = 'sometimes|nullable|exists:users,id';
+            $rules['due_date'] = 'sometimes|nullable|date';
+        } elseif ($user->role === 'agent') {
+            $rules['status']   = ['sometimes', 'required', 'in:resolved'];
+        } else {
+            $rules['status']   = ['sometimes', 'required', 'in:closed'];
+        }
+
+        return $rules;
     }
 }
