@@ -17,6 +17,8 @@
         <x-alert />
         @yield('content')
     </main>
+
+    <x-confirm-modal />
 </body>
 
 </html>

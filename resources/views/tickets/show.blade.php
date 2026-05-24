@@ -53,10 +53,34 @@
                     <h3 class="text-xs font-bold text-slate-400 uppercase mb-1">Estado</h3>
 
                     @if($canEdit)
-                        <form method="POST" action="{{ route('tickets.update', $ticket) }}">
+                        <form method="POST" action="{{ route('tickets.update', $ticket) }}" id="status-form">
                             @csrf @method('PATCH')
-                            <select name="status" onchange="if(confirm('¿Confirmas el cambio de estado?')) this.form.submit();"
-                                class="w-full border border-slate-300 rounded-lg px-2 py-1.5 text-sm">
+                            <select name="status"
+                                x-data="{
+                                    currentVal: '{{ $ticket->status }}',
+                                    handleChange(e) {
+                                        const select = e.target;
+                                        const newVal = select.value;
+                                        window.dispatchEvent(new CustomEvent('open-confirm-modal', {
+                                            detail: {
+                                                title: 'Cambiar Estado',
+                                                message: '¿Confirmas el cambio de estado de este ticket?',
+                                                confirmText: 'Confirmar',
+                                                cancelText: 'Cancelar',
+                                                confirmButtonClass: 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500',
+                                                onConfirm: () => {
+                                                    this.currentVal = newVal;
+                                                    select.form.submit();
+                                                },
+                                                onCancel: () => {
+                                                    select.value = this.currentVal;
+                                                }
+                                            }
+                                        }));
+                                    }
+                                }"
+                                @change="handleChange($event)"
+                                class="w-full border border-slate-300 rounded-lg px-2 py-1.5 text-sm cursor-pointer">
                                 @foreach(\App\Models\Ticket::STATUSES as $status)
                                     <option value="{{ $status }}" @selected($ticket->status === $status)>
                                         {{ ucfirst(str_replace('_', ' ', $status)) }}

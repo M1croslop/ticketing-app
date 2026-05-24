@@ -705,11 +705,20 @@
                                             </svg>
                                         </a>
                                         @can('delete', $ticket)
-                                            <form action="{{ route('tickets.destroy', $ticket) }}" method="POST"
-                                                  onsubmit="return confirm('¿Eliminar este ticket? Esta acción no se puede deshacer.')">
+                                            <form action="{{ route('tickets.destroy', $ticket) }}" method="POST" id="delete-form-{{ $ticket->id }}">
                                                 @csrf @method('DELETE')
-                                                <button type="submit"
+                                                <button type="button"
                                                         title="Eliminar ticket"
+                                                        onclick="window.dispatchEvent(new CustomEvent('open-confirm-modal', {
+                                                            detail: {
+                                                                title: 'Eliminar Ticket',
+                                                                message: '¿Eliminar este ticket? Esta acción no se puede deshacer.',
+                                                                confirmText: 'Eliminar',
+                                                                cancelText: 'Cancelar',
+                                                                confirmButtonClass: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
+                                                                onConfirm: () => document.getElementById('delete-form-{{ $ticket->id }}').submit()
+                                                            }
+                                                        }))"
                                                         class="p-1.5 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors duration-100">
                                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"

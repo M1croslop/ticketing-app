@@ -290,11 +290,20 @@
 
                                             @if($user->trashed())
                                                 {{-- RESTAURAR --}}
-                                                <form action="{{ route('admin.users.restore', $user) }}" method="POST">
+                                                <form action="{{ route('admin.users.restore', $user) }}" method="POST" id="restore-form-{{ $user->id }}">
                                                     @csrf
                                                     @method('PATCH')
-                                                    <button type="submit" title="Restaurar acceso"
-                                                        onclick="return confirm('¿Restaurar el acceso de {{ addslashes($user->name) }}?')"
+                                                    <button type="button" title="Restaurar acceso"
+                                                        onclick="window.dispatchEvent(new CustomEvent('open-confirm-modal', {
+                                                            detail: {
+                                                                title: 'Restaurar Acceso',
+                                                                message: '¿Restaurar el acceso de {{ addslashes($user->name) }}?',
+                                                                confirmText: 'Restaurar',
+                                                                cancelText: 'Cancelar',
+                                                                confirmButtonClass: 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500',
+                                                                onConfirm: () => document.getElementById('restore-form-{{ $user->id }}').submit()
+                                                            }
+                                                        }))"
                                                         class="text-slate-400 hover:text-emerald-600 transition inline-flex items-center justify-center p-2 rounded-lg hover:bg-emerald-50">
                                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -313,11 +322,20 @@
                                                     </button>
                                                 @else
                                                     {{-- SUSPENDER --}}
-                                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST">
+                                                    <form action="{{ route('admin.users.destroy', $user) }}" method="POST" id="suspend-form-{{ $user->id }}">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" title="Suspender usuario"
-                                                            onclick="return confirm('¿Suspender a {{ addslashes($user->name) }}? Perderá acceso al sistema.')"
+                                                        <button type="button" title="Suspender usuario"
+                                                            onclick="window.dispatchEvent(new CustomEvent('open-confirm-modal', {
+                                                                detail: {
+                                                                    title: 'Suspender Usuario',
+                                                                    message: '¿Suspender a {{ addslashes($user->name) }}? Perderá acceso al sistema.',
+                                                                    confirmText: 'Suspender',
+                                                                    cancelText: 'Cancelar',
+                                                                    confirmButtonClass: 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
+                                                                    onConfirm: () => document.getElementById('suspend-form-{{ $user->id }}').submit()
+                                                                }
+                                                            }))"
                                                             class="text-slate-400 hover:text-red-500 transition inline-flex items-center justify-center p-2 rounded-lg hover:bg-red-50">
                                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
