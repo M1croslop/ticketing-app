@@ -60,5 +60,14 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         ->name('stats');
 
      Route::post('/stats/export', [AdminController::class, 'export'])
-        ->name('stats.export');    
+        ->name('stats.export');
+
+    Route::get('/trash', [AdminController::class, 'trash'])
+        ->name('trash');
+
+    Route::patch('/trash/{id}/restore', [AdminController::class, 'restore'])
+        ->name('trash.restore');
+
+    Route::delete('/trash/{id}', [AdminController::class, 'forceDelete'])
+        ->name('trash.force-delete');
 });

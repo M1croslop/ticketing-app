@@ -247,5 +247,31 @@ class AdminController extends Controller
             ->header('Content-Type', 'text/html; charset=UTF-8');
     }
 
+    public function trash(): View
+    {
+        $tickets = Ticket::onlyTrashed()
+            ->with(['user', 'agent', 'category'])
+            ->latest('deleted_at')
+            ->get();
 
+        return view('admin.trash', compact('tickets'));
+    }
+
+    public function restore(int $id): RedirectResponse
+    {
+        $ticket = Ticket::onlyTrashed()->findOrFail($id);
+        $ticket->restore();
+
+        return redirect()->route('admin.trash')
+            ->with('success', "Ticket #{$ticket->id} restaurado correctamente.");
+    }
+
+    public function forceDelete(int $id): RedirectResponse
+    {
+        $ticket = Ticket::onlyTrashed()->findOrFail($id);
+        $ticket->forceDelete();
+
+        return redirect()->route('admin.trash')
+            ->with('success', "Ticket #{$id} eliminado definitivamente.");
+    }
 }
