@@ -13,7 +13,7 @@ class TicketPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true; // Todos los autenticados pueden listar (filtrado en Controller)
+        return true;
     }
 
     /**
@@ -31,7 +31,7 @@ class TicketPolicy
      */
     public function create(User $user): bool
     {
-        return true; // Cualquier autenticado puede abrir un ticket
+        return true;
     }
 
     /**

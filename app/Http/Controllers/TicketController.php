@@ -28,12 +28,10 @@ class TicketController extends Controller
         $categoryId = $request->get('category_id');
         $dateRange  = $request->get('date_range', 'all');
 
-        // ── Base query con visibilidad por rol 
         $baseQuery = Ticket::with(['user', 'agent', 'category'])
             ->when($user->role === 'client', fn($q) => $q->where('user_id', $user->id))
             ->when($user->role === 'agent',  fn($q) => $q->where('agent_id', $user->id));
 
-        // ── Filtros aplicados 
         $tickets = (clone $baseQuery)
             ->when($status, fn($q, $s) => $q->where('status', $s))
             ->when($categoryId, fn($q, $c) => $q->where('category_id', $c))
@@ -48,7 +46,6 @@ class TicketController extends Controller
         $agents     = $user->role === 'admin' ? User::agents()->orderBy('name')->get() : collect();
         $categories = Category::orderBy('name')->get();
 
-        // ── Métricas para el Agente 
         $activeCount       = 0;
         $resolvedToday     = 0;
         $criticalCount     = 0;
@@ -78,7 +75,6 @@ class TicketController extends Controller
             $avgResponseTime = $avgRaw !== null ? round(abs($avgRaw) / 60, 1) : 4.2;
         }
 
-        // ── Métricas para el Admin 
         $totalOpen           = 0;
         $escalatedCount      = 0;
         $agentEfficiencyPct  = 85;
@@ -100,9 +96,7 @@ class TicketController extends Controller
         return view('tickets.index', compact(
             'tickets', 'agents', 'categories',
             'status', 'search', 'categoryId', 'dateRange',
-            // agent metrics
             'activeCount', 'resolvedToday', 'criticalCount', 'avgResponseTime',
-            // admin metrics
             'totalOpen', 'escalatedCount', 'agentEfficiencyPct'
         ));
     }
@@ -172,7 +166,6 @@ class TicketController extends Controller
 
         $ticket->update($request->validated());
 
-        // Redirect back to show page when the request comes from the detail view
         if ($request->boolean('_redirect_back')) {
             return redirect()->route('tickets.show', $ticket)
                 ->with('success', 'Ticket actualizado correctamente.');
@@ -182,9 +175,6 @@ class TicketController extends Controller
             ->with('success', 'Ticket actualizado correctamente.');
     }
 
-    /**
-     * Agent self-assigns to an unassigned ticket ("Take Ticket").
-     */
     public function take(Ticket $ticket)
     {
         $this->authorize('take', $ticket);
@@ -193,7 +183,7 @@ class TicketController extends Controller
             $t = Ticket::where('id', $ticket->id)->lockForUpdate()->first();
             if ($t && is_null($t->agent_id)) {
                 $t->agent_id = Auth::id();
-                $t->save(); // Fires Eloquent events (SLA calculation, logs)
+                $t->save();
                 return true;
             }
             return false;

@@ -24,7 +24,6 @@ Route::middleware('auth')->group(function () {
 Route::resource('tickets', TicketController::class)
     ->middleware('auth');
 
-// Agent self-assign ("Tomar Ticket")
 Route::patch('tickets/{ticket}/take', [TicketController::class, 'take'])
     ->middleware('auth')
     ->name('tickets.take');

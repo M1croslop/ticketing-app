@@ -34,7 +34,6 @@ class UserSeeder extends Seeder
             'role'     => 'client',
         ]);
 
-        // Usuarios faker adicionales para volumen
         User::factory()->count(1)->create(['role' => 'admin']);
         User::factory()->count(2)->create(['role' => 'agent']);
         User::factory()->count(3)->create(['role' => 'client']);

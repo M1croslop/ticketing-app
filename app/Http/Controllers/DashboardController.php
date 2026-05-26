@@ -15,13 +15,13 @@ class DashboardController extends Controller
         $priority = request('priority');
         $orderBy = request('order_by', 'created_at_desc');
         
-        // Base query applying role-based visibility
-        // Admin sees all, agent sees only their assigned tickets, client sees only their created tickets
+        // Consulta base aplicando visibilidad según el rol
+        // El administrador ve todo, el agente ve solo sus tickets asignados y el cliente ve solo sus tickets creados
         $baseQuery = Ticket::query()
             ->when($user->role === 'client', fn($q) => $q->where('user_id', $user->id))
             ->when($user->role === 'agent', fn($q) => $q->where('agent_id', $user->id));
 
-        // Create a clone for date-range filtered metrics & lists
+        // Crear un clon para las métricas y listas filtradas por rango de fecha
         $filteredQuery = clone $baseQuery;
 
         if ($dateRange === 'today') {
@@ -59,14 +59,14 @@ class DashboardController extends Controller
             ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) as avg_hours')
             ->value('avg_hours');
 
-        // PERCENTAGES FOR ADMIN CARD PROGRESS BARS
+        // PORCENTAJES PARA LAS BARRAS DE PROGRESO DE LAS TARJETAS DE ADMINISTRACIÓN
         $openPercentage = $totalTicketsCount > 0 ? round(($openCount / $totalTicketsCount) * 100) : 0;
         $resolvedPercentage = $totalTicketsCount > 0 ? round(($resolvedTotalCount / $totalTicketsCount) * 100) : 0;
-        // SLA target is 72 hours. Efficiency bar fills higher when resolution time is faster.
+        // El objetivo de SLA es 72 horas. La barra de eficiencia se llena más cuando el tiempo de resolución es más rápido.
         $resolutionProgress = $avgResolutionTime > 0 ? min(100, max(15, round((72 / max(1, $avgResolutionTime)) * 100))) : 85;
 
-        // ADMIN DYNAMIC TREND CALCULATIONS
-        // 1. Total Open Tickets Daily Percentage Trend
+        // CÁLCULOS DE TENDENCIA DINÁMICA DEL ADMINISTRADOR
+        // 1. Tendencia de porcentaje diario del total de tickets abiertos
         $openCountYesterday = (clone $baseQuery)->where('status', 'open')
             ->whereDate('created_at', '<', Carbon::today())
             ->count();
@@ -75,7 +75,7 @@ class DashboardController extends Controller
             $openTrendPercent = round((($openCount - $openCountYesterday) / $openCountYesterday) * 100);
         }
 
-        // 2. Avg. Resolution Time Weekly Trend (This Week vs Last Week in hours)
+        // 2. Tendencia semanal del tiempo promedio de resolución (Esta semana vs la semana pasada en horas)
         $avgResThisWeek = (clone $baseQuery)->whereNotNull('resolved_at')
             ->whereBetween('resolved_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
             ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) as avg_hours')
@@ -91,11 +91,11 @@ class DashboardController extends Controller
             $avgResolutionTrend = round($avgResThisWeek - $avgResLastWeek, 1);
         }
 
-        // 3. Resolved Tickets Count in the active range (replaces strictly this month count)
+        // 3. Cantidad de tickets resueltos en el rango activo (reemplaza estrictamente el conteo de este mes)
         $resolvedThisMonthCount = (clone $filteredQuery)->whereIn('status', ['resolved', 'closed'])
             ->count();
 
-        // Average Response Time based on boss's suggested formula (due_date - resolved_at, converted to hours)
+        // Tiempo promedio de respuesta basado en la fórmula sugerida por el jefe (due_date - resolved_at, convertido a horas)
         $avgResponseTimeRaw = (clone $filteredQuery)->whereNotNull('resolved_at')
             ->whereNotNull('due_date')
             ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, resolved_at, due_date)) as avg_min')
@@ -104,10 +104,10 @@ class DashboardController extends Controller
         if ($avgResponseTimeRaw !== null) {
             $avgResponseTime = round(abs($avgResponseTimeRaw) / 60, 1);
         } else {
-            $avgResponseTime = 4.2; // Default mockup fallback in hours
+            $avgResponseTime = 4.2; // Valor por defecto de respaldo en horas
         }
 
-        // Average Response Time trend (This Week vs Last Week in hours)
+        // Tendencia del tiempo promedio de respuesta (Esta semana vs la semana pasada en horas)
         $avgResponseThisWeekRaw = (clone $baseQuery)->whereNotNull('resolved_at')
             ->whereNotNull('due_date')
             ->whereBetween('resolved_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()])
@@ -136,14 +136,14 @@ class DashboardController extends Controller
 
         $recentTickets = $ticketsQuery->latest()->paginate(5)->withQueryString();
 
-        // SLA Breaches calculation (Overdue open/in-progress tickets relative to now)
+        // Cálculo de infracciones de SLA (Tickets abiertos/en progreso vencidos con respecto a la hora actual)
         $slaBreachesCount = (clone $filteredQuery)
             ->whereIn('status', ['open', 'in_progress'])
             ->whereNotNull('due_date')
             ->where('due_date', '<', Carbon::now())
             ->count();
 
-        // SLA Breaches Yesterday calculation (Overdue open/in-progress tickets relative to yesterday)
+        // Cálculo de infracciones de SLA de ayer (Tickets abiertos/en progreso vencidos con respecto al día de ayer)
         $slaBreachesYesterdayCount = (clone $baseQuery)
             ->whereIn('status', ['open', 'in_progress'])
             ->whereNotNull('due_date')
@@ -157,25 +157,25 @@ class DashboardController extends Controller
         $inProgressTicketsQuery = (clone $filteredQuery)->where('status', 'in_progress');
         $resolvedTicketsQuery = (clone $filteredQuery)->whereIn('status', ['resolved', 'closed']);
 
-        // Apply priority filter
+        // Aplicar filtro de prioridad
         if ($priority && $priority !== 'all') {
             $newTicketsQuery->where('priority', $priority);
             $inProgressTicketsQuery->where('priority', $priority);
             $resolvedTicketsQuery->where('priority', $priority);
         }
 
-        // Apply sorting / ordering
+        // Aplicar clasificación / ordenamiento
         if ($orderBy === 'created_at_asc') {
             $newTicketsQuery->oldest();
             $inProgressTicketsQuery->oldest();
             $resolvedTicketsQuery->oldest();
         } elseif ($orderBy === 'due_date_asc') {
-            // Put tickets with null due_date at the end
+            // Colocar los tickets con fecha de vencimiento nula al final
             $newTicketsQuery->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END, due_date ASC');
             $inProgressTicketsQuery->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END, due_date ASC');
             $resolvedTicketsQuery->orderByRaw('CASE WHEN due_date IS NULL THEN 1 ELSE 0 END, due_date ASC');
         } else {
-            // Default: newest first
+            // Por defecto: los más nuevos primero
             $newTicketsQuery->latest();
             $inProgressTicketsQuery->latest();
             $resolvedTicketsQuery->latest();

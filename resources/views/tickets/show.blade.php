@@ -72,7 +72,6 @@
 <div class="min-h-screen bg-synapso-bg py-6">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    {{--  Breadcrumb  --}}
     <div class="mb-5 flex items-center gap-2 text-xs font-semibold text-slate-400">
         <a href="{{ route('tickets.index') }}"
            class="flex items-center gap-1.5 hover:text-synapso-gold transition-colors duration-150">
@@ -85,18 +84,12 @@
         <span class="text-slate-500 font-bold">{{ $ticketId }}</span>
     </div>
 
-    {{-- 
-         HEADER CARD — title + inline controls
-     --}}
     <div class="bg-white border border-slate-200 rounded-2xl shadow-sm mb-5 overflow-hidden">
 
-        {{-- Top header bar --}}
         <div class="px-6 py-5 border-b border-slate-100 flex flex-wrap gap-4 items-start justify-between">
-            {{-- Title block --}}
             <div class="flex-1 min-w-0">
                 <div class="flex items-center gap-2 mb-1.5">
                     <span class="text-[10px] font-black text-synapso-gold uppercase tracking-widest">{{ $ticketId }}</span>
-                    {{-- Priority badge (always visible static for non-admin) --}}
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide {{ $pb['badge'] }}">
                         <span class="w-1.5 h-1.5 rounded-full {{ $pb['dot'] }}"></span>
                         {{ $pb['label'] }}
@@ -115,11 +108,9 @@
                 </p>
             </div>
 
-            {{-- Inline action controls (Admin only) --}}
             @if($isAdmin)
             <div class="flex flex-wrap items-center gap-2 shrink-0">
 
-                {{-- STATUS inline select --}}
                 <form action="{{ route('tickets.update', $ticket) }}" method="POST" id="form-status-{{ $ticket->id }}">
                     @csrf @method('PATCH')
                     <input type="hidden" name="_redirect_back" value="1">
@@ -167,7 +158,6 @@
                     </div>
                 </form>
 
-                {{-- PRIORITY inline select (Admin only) --}}
                 @if($isAdmin)
                 <form action="{{ route('tickets.update', $ticket) }}" method="POST" id="form-priority-{{ $ticket->id }}">
                     @csrf @method('PATCH')
@@ -216,7 +206,6 @@
                 </form>
                 @endif
 
-                {{-- Admin: Delete button --}}
                 @if($isAdmin)
                 <form action="{{ route('tickets.destroy', $ticket) }}" method="POST"
                       x-data
@@ -243,7 +232,6 @@
             </div>
             @endif
 
-            {{-- Agent: Take ticket button --}}
             @if($canTake)
             <form action="{{ route('tickets.take', $ticket) }}" method="POST">
                 @csrf
@@ -260,7 +248,6 @@
             </form>
             @endif
 
-            {{-- Agent: Close ticket quick action (only their assigned tickets) --}}
             @if($isAgent && $ticket->agent_id === $user->id && !in_array($ticket->status, ['resolved','closed']))
             <form action="{{ route('tickets.update', $ticket) }}" method="POST">
                 @csrf @method('PATCH')
@@ -277,7 +264,6 @@
             </form>
             @endif
 
-            {{-- Client: Close ticket quick action --}}
             @if($isOwner && !in_array($ticket->status, ['resolved', 'closed']))
             <form action="{{ route('tickets.update', $ticket) }}" method="POST">
                 @csrf @method('PATCH')
@@ -296,10 +282,8 @@
 
         </div>
 
-        {{--  Body: Description + Sidebar  --}}
         <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-            {{-- DESCRIPTION column --}}
             <div class="lg:col-span-2 space-y-4">
                 <div>
                     <h2 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Descripción</h2>
@@ -308,7 +292,6 @@
                     </div>
                 </div>
 
-                {{-- Resolved timestamp notice --}}
                 @if($ticket->resolved_at)
                 <div class="flex items-center gap-2 text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
                     <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -319,7 +302,6 @@
                 </div>
                 @endif
 
-                {{-- SLA warning --}}
                 @if($isOverdue)
                 <div class="flex items-center gap-2 text-xs font-bold text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2 animate-pulse">
                     <svg class="w-4 h-4 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,10 +313,8 @@
                 @endif
             </div>
 
-            {{-- META SIDEBAR --}}
             <div class="space-y-5">
 
-                {{-- Created by --}}
                 <div>
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Creado por</h3>
                     <div class="flex items-center gap-3">
@@ -348,7 +328,6 @@
                     </div>
                 </div>
 
-                {{-- Assigned to --}}
                 <div>
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Asignado a</h3>
                     @if($isAdmin)
@@ -433,7 +412,6 @@
                     @endif
                 </div>
 
-                {{-- Category --}}
                 <div>
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Categoría</h3>
                     @if($isAdmin)
@@ -463,7 +441,6 @@
                     @endif
                 </div>
 
-                {{-- SLA / Due date --}}
                 <div>
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Fecha Límite SLA</h3>
                     @if($ticket->due_date)
@@ -489,15 +466,10 @@
         </div>
     </div>
 
-    {{-- 
-         MAIN GRID: Comments + Activity Sidebar
-     --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-        {{--  LEFT: Comments thread  --}}
         <div class="lg:col-span-2">
 
-            {{-- Comment thread header --}}
             <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                     <div class="flex items-center gap-2">
@@ -512,7 +484,6 @@
                     </span>
                 </div>
 
-                {{-- Comments list --}}
                 <div class="p-5 space-y-4">
                     @if($ticket->comments->isEmpty())
                     <div class="py-10 text-center">
@@ -533,20 +504,17 @@
                         $isAgentComment = in_array($commentorRole, ['agent', 'admin']);
                     @endphp
                     <div class="flex gap-3 {{ $isMine ? 'flex-row-reverse' : '' }}">
-                        {{-- Avatar --}}
                         <div class="flex-shrink-0">
                             <div class="w-9 h-9 rounded-full {{ $avatarColor($comment->user->id ?? 0) }} flex items-center justify-center text-white text-xs font-bold shadow-sm">
                                 {{ $initials($comment->user->name ?? 'Usuario Eliminado') }}
                             </div>
                         </div>
 
-                        {{-- Bubble --}}
                         <div class="max-w-[75%] group">
                             <div class="{{ $isMine
                                 ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-sm'
                                 : 'bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-tl-sm shadow-sm' }} p-3.5">
 
-                                {{-- Header --}}
                                 <div class="flex items-center gap-2 mb-1.5 {{ $isMine ? 'flex-row-reverse' : '' }}">
                                     <span class="text-xs font-bold {{ $isMine ? 'text-indigo-200' : 'text-slate-900' }}">
                                         {{ $comment->user->name ?? 'Usuario Eliminado' }}
@@ -568,7 +536,6 @@
                                 </p>
                             </div>
 
-                            {{-- Delete action --}}
                             @if($isAdmin || $comment->user_id === $user->id)
                             <div class="mt-1 {{ $isMine ? 'text-right' : 'text-left' }} opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                                 <form action="{{ route('tickets.comments.destroy', [$ticket, $comment]) }}" method="POST"
@@ -594,7 +561,6 @@
                     @endif
                 </div>
 
-                {{--  Reply form  --}}
                 @if($isAdmin || $isAgent || $isOwner)
                 <div class="px-5 pb-5"
                      x-data="{
@@ -662,10 +628,8 @@
             </div>
         </div>
 
-        {{--  RIGHT SIDEBAR: Activity + SLA panel  --}}
         <div class="space-y-5">
 
-            {{-- Activity Register --}}
             <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
                     <div class="flex items-center gap-2">
@@ -686,7 +650,6 @@
                 </div>
 
                 <div class="p-5">
-                    {{-- Ticket created entry --}}
                     <div class="relative pl-6 pb-4">
                         <div class="absolute left-0 top-1 w-4 h-4 rounded-full bg-indigo-100 border-2 border-indigo-300 flex items-center justify-center flex-shrink-0">
                             <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
@@ -698,7 +661,6 @@
                         </p>
                     </div>
 
-                    {{-- Agent assigned entry (if exists) --}}
                     @if($ticket->agent)
                     <div class="relative pl-6 pb-4">
                         <div class="absolute left-0 top-1 w-4 h-4 rounded-full bg-sky-100 border-2 border-sky-300 flex items-center justify-center flex-shrink-0">
@@ -714,7 +676,6 @@
                     </div>
                     @endif
 
-                    {{-- Status change logs --}}
                     @forelse($activityLogs->take(4) as $log)
                     @php
                         $logDot = [
@@ -748,7 +709,6 @@
                     <p class="text-xs text-slate-400 italic text-center py-2">Sin cambios de estado registrados</p>
                     @endforelse
 
-                    {{-- Show more collapsed logs --}}
                     @if($activityLogs->count() > 4)
                     <div x-data="{ expanded: false }">
                         <div x-show="expanded" class="space-y-0 mt-0">
@@ -784,7 +744,6 @@
                 </div>
             </div>
 
-            {{-- SLA / Audit Panel (Admin only) --}}
             @if($isAdmin)
             <div class="bg-slate-900 rounded-2xl shadow-lg overflow-hidden text-white">
                 <div class="px-5 py-4 border-b border-white/10 flex items-center gap-2">
@@ -829,7 +788,6 @@
             </div>
             @endif
 
-            {{-- Agent SLA compact panel --}}
             @if($isAgent)
             <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
@@ -864,7 +822,6 @@
             </div>
             @endif
 
-            {{-- Client info panel --}}
             @if($isClient)
             <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
                 <div class="px-5 py-4 border-b border-slate-100">
