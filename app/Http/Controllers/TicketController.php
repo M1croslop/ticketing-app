@@ -28,12 +28,12 @@ class TicketController extends Controller
         $categoryId = $request->get('category_id');
         $dateRange  = $request->get('date_range', 'all');
 
-        // ── Base query con visibilidad por rol ──────────────────────────────
+        // ── Base query con visibilidad por rol 
         $baseQuery = Ticket::with(['user', 'agent', 'category'])
             ->when($user->role === 'client', fn($q) => $q->where('user_id', $user->id))
             ->when($user->role === 'agent',  fn($q) => $q->where('agent_id', $user->id));
 
-        // ── Filtros aplicados ────────────────────────────────────────────────
+        // ── Filtros aplicados 
         $tickets = (clone $baseQuery)
             ->when($status, fn($q, $s) => $q->where('status', $s))
             ->when($categoryId, fn($q, $c) => $q->where('category_id', $c))
@@ -48,7 +48,7 @@ class TicketController extends Controller
         $agents     = $user->role === 'admin' ? User::agents()->orderBy('name')->get() : collect();
         $categories = Category::orderBy('name')->get();
 
-        // ── Métricas para el Agente ──────────────────────────────────────────
+        // ── Métricas para el Agente 
         $activeCount       = 0;
         $resolvedToday     = 0;
         $criticalCount     = 0;
@@ -78,7 +78,7 @@ class TicketController extends Controller
             $avgResponseTime = $avgRaw !== null ? round(abs($avgRaw) / 60, 1) : 4.2;
         }
 
-        // ── Métricas para el Admin ───────────────────────────────────────────
+        // ── Métricas para el Admin 
         $totalOpen           = 0;
         $escalatedCount      = 0;
         $agentEfficiencyPct  = 85;

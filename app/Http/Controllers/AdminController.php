@@ -98,7 +98,7 @@ class AdminController extends Controller
 
     public function stats()
     {
-        // ── 1. Total de tickets por categoría ───────────────────────────────
+        // ── 1. Total de tickets por categoría 
         $ticketsByCategory = Category::withCount([
             'tickets',
             'tickets as open_count'        => fn($q) => $q->where('status', 'open'),
@@ -110,7 +110,7 @@ class AdminController extends Controller
  
         $maxCategoryCount = $ticketsByCategory->max('tickets_count') ?: 1;
  
-        // ── 2. Tiempo promedio de resolución (horas) ────────────────────────
+        // ── 2. Tiempo promedio de resolución (horas) 
         $avgResolutionTime = Ticket::whereNotNull('resolved_at')
             ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) as avg_hours')
             ->value('avg_hours');
@@ -125,23 +125,23 @@ class AdminController extends Controller
             ->orderBy('due_date')
             ->get();
  
-        // ── Totales de tickets ──────────────────────────────────────────────
+        // ── Totales de tickets 
         $totalTickets    = Ticket::count();
         $openCount       = Ticket::where('status', 'open')->count();
         $inProgressCount = Ticket::where('status', 'in_progress')->count();
         $resolvedCount   = Ticket::whereIn('status', ['resolved', 'closed'])->count();
  
-        // ── Cumplimiento SLA ────────────────────────────────────────────────
+        // ── Cumplimiento SLA 
         $slaComplianceRate = Ticket::slaComplianceRate();
  
-        // ── Tabla CRUD de usuarios (sin contraseñas ni datos sensibles) ──────
+        // ── Tabla CRUD de usuarios (sin contraseñas ni datos sensibles) 
         $allUsers = User::withTrashed()
             ->withCount(['tickets', 'assignedTickets'])
             ->orderBy('role')
             ->orderBy('name')
             ->get();
  
-        // ── Conteos de usuarios (compatibilidad con la vista original) ───────
+        // ── Conteos de usuarios (compatibilidad con la vista original) 
         $users   = User::count();
         $admins  = User::where('role', 'admin')->count();
         $agents  = User::where('role', 'agent')->count();

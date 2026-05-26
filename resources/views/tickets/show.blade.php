@@ -11,7 +11,7 @@
     $isClient  = $userRole === 'client';
     $isOwner   = $user->id === $ticket->user_id;
 
-    // ── Badge maps ────────────────────────────────────────────────────────────
+    //  Badge maps 
     $priorityMeta = [
         'urgent' => ['label' => 'CRÍTICO',  'dot' => 'bg-pink-500',    'badge' => 'bg-synapso-priority-urgent-bg text-synapso-priority-urgent-text border border-pink-200'],
         'high'   => ['label' => 'ALTA',     'dot' => 'bg-red-500',     'badge' => 'bg-synapso-priority-high-bg text-synapso-priority-high-text border border-red-200'],
@@ -72,7 +72,7 @@
 <div class="min-h-screen bg-synapso-bg py-6">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    {{-- ── Breadcrumb ────────────────────────────────────────────────────── --}}
+    {{--  Breadcrumb  --}}
     <div class="mb-5 flex items-center gap-2 text-xs font-semibold text-slate-400">
         <a href="{{ route('tickets.index') }}"
            class="flex items-center gap-1.5 hover:text-synapso-gold transition-colors duration-150">
@@ -85,9 +85,9 @@
         <span class="text-slate-500 font-bold">{{ $ticketId }}</span>
     </div>
 
-    {{-- ════════════════════════════════════════════════════════════════════
+    {{-- 
          HEADER CARD — title + inline controls
-    ════════════════════════════════════════════════════════════════════ --}}
+     --}}
     <div class="bg-white border border-slate-200 rounded-2xl shadow-sm mb-5 overflow-hidden">
 
         {{-- Top header bar --}}
@@ -296,7 +296,7 @@
 
         </div>
 
-        {{-- ── Body: Description + Sidebar ──────────────────────────────── --}}
+        {{--  Body: Description + Sidebar  --}}
         <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             {{-- DESCRIPTION column --}}
@@ -489,12 +489,12 @@
         </div>
     </div>
 
-    {{-- ════════════════════════════════════════════════════════════════════
+    {{-- 
          MAIN GRID: Comments + Activity Sidebar
-    ════════════════════════════════════════════════════════════════════ --}}
+     --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
-        {{-- ── LEFT: Comments thread ──────────────────────────────────── --}}
+        {{--  LEFT: Comments thread  --}}
         <div class="lg:col-span-2">
 
             {{-- Comment thread header --}}
@@ -594,7 +594,7 @@
                     @endif
                 </div>
 
-                {{-- ── Reply form ─────────────────────────────────────── --}}
+                {{--  Reply form  --}}
                 @if($isAdmin || $isAgent || $isOwner)
                 <div class="px-5 pb-5"
                      x-data="{
@@ -662,7 +662,7 @@
             </div>
         </div>
 
-        {{-- ── RIGHT SIDEBAR: Activity + SLA panel ───────────────────── --}}
+        {{--  RIGHT SIDEBAR: Activity + SLA panel  --}}
         <div class="space-y-5">
 
             {{-- Activity Register --}}

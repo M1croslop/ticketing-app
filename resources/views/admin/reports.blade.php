@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-{{-- ── Guard: solo admin ──────────────────────────────────────────────────── --}}
+{{-- Guard: solo admin --}}
 @if(auth()->user()->role !== 'admin')
     <div class="min-h-screen flex items-center justify-center bg-synapso-bg">
         <div class="text-center">
@@ -36,7 +36,7 @@
 <div class="min-h-screen bg-synapso-bg py-8">
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-    {{-- ── Encabezado ───────────────────────────────────────────────────── --}}
+    {{-- Encabezado --}}
     <div class="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
         <div>
             <p class="text-[10px] font-bold text-synapso-gold uppercase tracking-widest mb-1">Panel de Administración</p>
@@ -67,7 +67,7 @@
         </div>
     </div>
 
-    {{-- ── Fila 1: KPI Cards ─────────────────────────────────────────────── --}}
+    {{-- Fila 1: KPI Cards --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
         {{-- Total Tickets --}}
@@ -139,7 +139,7 @@
 
     </div>
 
-    {{-- ── Fila 2: Volumen semanal + Distribución por estado ────────────── --}}
+    {{-- Fila 2: Volumen semanal + Distribución por estado --}}
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
 
         {{-- Sparkline: tickets por día (últimos 7 días) --}}
@@ -236,10 +236,10 @@
 
     </div>
 
-    {{-- ── Fila 3: Tickets por Categoría + Tickets Vencidos ──────────────── --}}
+    {{-- Fila 3: Tickets por Categoría + Tickets Vencidos --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 
-        {{-- ── Tickets por Categoría (requerido) ───────────────────────── --}}
+        {{-- Tickets por Categoría (requerido) --}}
         <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100">
                 <h2 class="text-sm font-bold text-slate-800 tracking-tight">Tickets por Categoría</h2>
@@ -316,7 +316,7 @@
             </div>
         </div>
 
-        {{-- ── Tickets Vencidos (requerido) ────────────────────────────── --}}
+        {{-- Tickets Vencidos (requerido) --}}
         <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
             <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between">
                 <div>
@@ -419,7 +419,7 @@
 
     </div>
 
-    {{-- ── Fila 4: Top Agentes ───────────────────────────────────────────── --}}
+    {{--  Fila 4: Top Agentes  --}}
     <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
         <div class="px-6 py-5 border-b border-slate-100">
             <h2 class="text-sm font-bold text-slate-800 tracking-tight">Rendimiento de Agentes</h2>
