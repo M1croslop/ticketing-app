@@ -104,7 +104,7 @@ class DashboardController extends Controller
         if ($avgResponseTimeRaw !== null) {
             $avgResponseTime = round(abs($avgResponseTimeRaw) / 60, 1);
         } else {
-            $avgResponseTime = 4.2; // Valor por defecto de respaldo en horas
+            $avgResponseTime = null; // Sin valor por defecto estático
         }
 
         // Tendencia del tiempo promedio de respuesta (Esta semana vs la semana pasada en horas)

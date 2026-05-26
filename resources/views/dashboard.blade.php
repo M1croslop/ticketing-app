@@ -67,7 +67,12 @@
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tiempo Promedio de Resolución</p>
                         <div class="flex items-baseline mt-2">
-                            <span class="text-3xl font-extrabold text-slate-800 tracking-tight">{{ $avgResolutionTime ? number_format($avgResolutionTime, 1) : '4.2' }} <span class="text-xl font-bold text-slate-600">hrs</span></span>
+                            <span class="text-3xl font-extrabold text-slate-800 tracking-tight">
+                                {{ $avgResolutionTime ? number_format($avgResolutionTime, 1) : '—' }}
+                                @if($avgResolutionTime)
+                                    <span class="text-xl font-bold text-slate-600">hrs</span>
+                                @endif
+                            </span>
                             @if($avgResolutionTrend < 0)
                                 <span class="text-emerald-500 font-extrabold text-xs ml-2 inline-flex items-center gap-0.5">▼ {{ abs($avgResolutionTrend) }}h</span>
                             @elseif($avgResolutionTrend > 0)
@@ -339,7 +344,12 @@
                 <div class="relative overflow-hidden bg-white rounded-xl shadow-sm border border-slate-100 p-6 flex items-center justify-between h-28">
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tiempo Prom. de Respuesta</p>
-                        <p class="text-3xl font-extrabold text-slate-800 mt-1 tracking-tight">{{ $avgResponseTime }} <span class="text-lg font-bold text-slate-600">hrs</span></p>
+                        <p class="text-3xl font-extrabold text-slate-800 mt-1 tracking-tight">
+                            {{ $avgResponseTime ? number_format($avgResponseTime, 1) : '—' }}
+                            @if($avgResponseTime)
+                                <span class="text-lg font-bold text-slate-600">hrs</span>
+                            @endif
+                        </p>
                         @if($avgResponseTrend < 0)
                             <p class="text-[10px] font-bold text-emerald-500 mt-1 inline-flex items-center gap-0.5">
                                 ▼ {{ $avgResponseTrend }}h esta semana
