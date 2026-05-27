@@ -22,8 +22,8 @@ return new class extends Migration
                   ->onDelete('cascade');
 
             // Estados
-            $table->string('old_status');
-            $table->string('new_status');
+            $table->enum('old_status', ['open', 'in_progress', 'resolved', 'closed']);
+            $table->enum('new_status', ['open', 'in_progress', 'resolved', 'closed']);
 
             // Fecha del cambio
             $table->timestamp('changed_at')->useCurrent();

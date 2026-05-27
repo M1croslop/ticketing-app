@@ -1,17 +1,25 @@
 <?php
 
 namespace Database\Seeders;
+
 use App\Models\Category;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class CategorySeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        Category::factory()->count(5)->create();
+        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Category::truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        Category::insert([
+            ['name' => 'Hardware',  'description' => 'Equipos físicos'],
+            ['name' => 'Software',  'description' => 'Aplicaciones y programas'],
+            ['name' => 'Redes',     'description' => 'Conexión e internet'],
+            ['name' => 'Accesos',   'description' => 'Contraseñas y permisos'],
+            ['name' => 'Otro',      'description' => 'Otros problemas'],
+        ]);
     }
 }

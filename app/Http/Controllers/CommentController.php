@@ -32,7 +32,10 @@ class CommentController extends Controller
     public function store(StoreCommentRequest $request, Ticket $ticket)
     {
         $user = Auth::user();
-        if ($user->role !== 'admin' && $user->role !== 'agent' && $user->id !== $ticket->user_id) {
+        $isStaff = in_array(strtolower($user->role), ['admin', 'agent']);
+        $isOwner = $user->id === $ticket->user_id;
+
+        if (!$isStaff && !$isOwner) {
             abort(403, 'No tienes permisos para comentar en este ticket.');
         }
 

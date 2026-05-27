@@ -13,7 +13,7 @@ class TicketPolicy
      */
     public function viewAny(User $user): bool
     {
-        return true; // Todos los autenticados pueden listar (filtrado en Controller)
+        return true;
     }
 
     /**
@@ -31,7 +31,7 @@ class TicketPolicy
      */
     public function create(User $user): bool
     {
-        return true; // Cualquier autenticado puede abrir un ticket
+        return true;
     }
 
     /**
@@ -40,8 +40,17 @@ class TicketPolicy
     public function update(User $user, Ticket $ticket): bool
     {
         return $user->role === 'admin'
-            || $user->role === 'agent'
+            || ($user->role === 'agent' && $ticket->agent_id === $user->id)
             || $user->id === $ticket->user_id;
+    }
+
+    /**
+     * Determine whether the user can self-assign an unassigned ticket.
+     */
+    public function take(User $user, Ticket $ticket): bool
+    {
+        return in_array($user->role, ['agent', 'admin'])
+            && is_null($ticket->agent_id);
     }
 
     /**
