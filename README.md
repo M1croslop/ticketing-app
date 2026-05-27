@@ -1,41 +1,98 @@
-# Ticketing App / SYNAPSO
+# Ticketing It App
 
-Este proyecto es un sistema de gestión de tickets. Permite crear, asignar y resolver solicitudes de soporte. El sistema organiza a los usuarios en tres roles: Administrador, Agente y Usuario. Facilita el seguimiento de problemas mediante estados, prioridades y comentarios. Incluye cálculo de SLA para definir fechas límite de resolución.
+Aplicacion de gestión de servicios de Ticketing TI (ITSM).
+Su objetivo principal es optimizar la experiencia de los empleados y mejorar la eficiencia de los equipos de tecnología mediante una plataforma unificada.
 
-## Integrantes
+## Requisitos Previos
 
-* Daniel Alejandro Ventura Ceron
-* José Adrián Hernández Peñate
-* Francisco Alexander Pleitez Mejía
-* Kevin Alexis Castró Lobos
+Asegúrate de tener instalados los siguientes programas en tu entorno local:
 
-## Tecnologías y Herramientas
+* PHP
+* Composer
+* Node.js
+* Mysql - Gestor de db local
 
-* Backend: PHP con el framework Laravel.
-* Frontend: Motor de plantillas Blade, Tailwind CSS y Alpine.js.
-* Base de Datos: MySQL gestionado mediante migraciones y Eloquent ORM.
-* Autenticación: Laravel Breeze.
-* Control de Versiones: Git con flujo de trabajo GitFlow.
+## Instalación
 
-## Metodología y Gestión de Proyecto
+Ejecuta estos comandos en tu terminal para preparar el código fuente:
 
-El equipo utiliza la metodología ágil Scrum. El desarrollo avanza mediante iteraciones cortas. 
+1. Descarga el repositorio:
+```bash
+   git clone https://github.com/M1croslop/ticketing-app.git
+```
 
-* Sprint 0: Configuración del repositorio, base de datos y diseño base.
-* Sprint 1: Desarrollo del núcleo de creación y edición de tickets.
-* Sprint 2: Implementación de hilos de comentarios y registro de estados.
-* Sprint 3: Panel de administración, métricas y control de acceso.
-* sprint 4: Pulido y entrega final.
+2. Ingresa al directorio:
+```bash
+   cd ticketing-app
+```
 
-La planificación y seguimiento se realiza con GitHub Projects. Esta herramienta organiza el Backlog y estructura el progreso. Permite visualizar el estado de cada tarea, asignar responsables, clasificar por disciplina, establecer niveles de urgencia y estimar el esfuerzo.
+3. Instala los paquetes de backend:
+```bash
+   composer install
+```
 
-## Roles del Equipo
+4. Prepara las variables de entorno:
+```bash
+   cp .env.example .env
+```
 
-* jadrianh: Team Leader, Scrum Master, QA y desarrollador.
-* danialejandro: Desarrollador Backend.
-* FranciscoPleitez: Desarrollador Full Stack.
-* AlexisCastro84: Desarrollador Frontend.
+5. Genera la clave de seguridad:
+```bash
+   php artisan key:generate
+```
 
-## Gestión del Proyecto
+## Configuración de la Base de Datos
 
-Utilizamos GitHub Projects para centralizar la planificación del equipo. Esta herramienta conecta de forma directa el flujo de trabajo con el repositorio de código. Permite gestionar el Backlog, asignar tareas a cada desarrollador, definir niveles de prioridad y organizar el avance en Sprints semanales. Su integración elimina intermediarios y mantiene el estado del proyecto actualizado de forma automática con cada cambio en el código.
+Crea una base de datos nueva en tu gestor local. 
+
+Abre el archivo `.env` en tu editor de código. Modifica la sección de base de datos con tus credenciales locales:
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=nombre_de_la_base_de_datos
+DB_USERNAME=tu_usuario_local
+DB_PASSWORD=tu_contraseña_local
+```
+
+Construye las tablas y carga los datos de prueba con este comando:
+```bash
+php artisan migrate --seed
+```
+
+## Iniciar el Servidor
+
+Ejecuta el servidor de desarrollo para procesar la interfaz visual:
+```bash
+php artisan serve
+```
+
+## Diagrama de la Base de Datos
+
+La estructura de datos del sistema sigue el diseño definido en el siguiente esquema. Consulta este diagrama antes de realizar nuevas migraciones en Laravel.
+
+<img width="1080" height="1080" alt="schema" src="https://github.com/user-attachments/assets/398dfe6f-f922-4ff5-a971-7c17de89bd50" />
+
+> [!IMPORTANT]
+> ### Reglas de Trabajo en Equipo
+>
+> Para mantener un historial de cambios profesional, utilizamos la especificación [Conventional Commits v1.0.0](https://www.conventionalcommits.org/en/v1.0.0/). Todo el equipo debe seguir esta estructura en sus mensajes:
+>
+> `tipo(alcance opcional): descripción corta`
+>
+> ## Tipos de Mensajes
+> * **feat**: Nueva funcionalidad para el usuario.
+> * **fix**: Solución de un error en el código.
+> * **docs**: Cambios exclusivamente en la documentación.
+> * **style**: Cambios de formato que no afectan la lógica.
+> * **refactor**: Cambio en el código que no corrige errores ni añade funciones.
+> * **test**: Añadir o corregir pruebas existentes.
+> * **chore**: Actualizaciones de tareas de construcción o herramientas locales.
+>
+> ### Ejemplo Práctico
+> `feat(auth): implementar validación de correo electrónico`
+
+## License
+
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
